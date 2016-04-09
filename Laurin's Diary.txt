@@ -1,0 +1,7 @@
+Laurin's Diary
+
+4-6-16
+	We got together with our whole group for the first time. We discussed using the Decorator pattern since it seemed we would be adding to the shapes themselves. We are going to work on the UML then divide and conquer. 
+
+4-8-16
+	Finally starting the project. I put in the c++ main file and am hoping to implement catch and write some tests that fail for everyone. Then I want to write some design in the document so we all know what structure/design pattern we are going to use. 
