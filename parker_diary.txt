@@ -1,1 +1,2 @@
 3-23 initial commit
+4-12 made some of the shapes, not currently in the best sintax but I think its on the right path.
