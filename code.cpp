@@ -23,27 +23,6 @@ public:
     double _hitY;
 };
 
-/*
-class rotated: public shape{
-public:
-    rotated(std::initializer_list<shape*> list,double ang){
-        for(shape* i:list){
-            _shapes.push_back(i);
-        }
-        _angle=ang;
-    }
-    void print(ostream& out) override{
-        out << "gsave\n" << _angle << " rotate\n";
-        for(int i=0;i<_shapes.size();i++){
-            _shapes[i]->print(out);
-        }
-        out << "grestore\n";
-    }
-    ~rotated(){}
-private:
-    vector<shape*> _shapes;
-    double _angle;
-};*/
 class layered: public shape{
 public:
     layered(std::initializer_list<shape*> list){
@@ -139,14 +118,40 @@ private:
     double _hight;
 };
 
+class circle: public shape{
+public:
+    circle(double radious){
+        _radious=radious;
+        _hitX=_radious;
+        _hitY=_radious;
+    }
+    void print(ostream& out) override{
+        out << "0 0 " << _radious << " 0 360 arc stroke\n";
+    }
+private:
+    double _radious;
+};
 
+class polygon: public shape{
+    polygon(int sides,double length){
+        _sides=sides;
+        double angle=2*3.1415/_sides;
+        
+    }
+private:
+    double _radious;
+    int _sides;
+}
 
 int main(){
     ofstream out("output.ps");
+    circle cir(40);
+    cir.print(out);
+/*
     rectangle rec(1,1);
     rotated rotrec({&rec},45);
     scaled scaleSquare(&rotrec,100,100);
     scaled scaleSquare2(&rec,100,100);
     layered top{&scaleSquare,&scaleSquare2};
-    top.print(out);
+    top.print(out);*/
 }
