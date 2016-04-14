@@ -4,6 +4,9 @@
 #include <string>
 #include <fstream>
 #include <cmath>
+#include <memory>
+using std::shared_ptr;
+using std::make_shared;
 using std::sqrt;
 using std::pow;
 using std::sin;
@@ -15,6 +18,9 @@ using std::ostream;
 using std::vector;
 using std::initializer_list;
 
+//deleate this later::test for mem leeks;
+int num=0;
+
 class shape{
 public:
     virtual ~shape(){}
@@ -25,8 +31,9 @@ public:
 
 class layered: public shape{
 public:
-    layered(std::initializer_list<shape*> list){
-        for(shape* i:list){
+    layered(initializer_list< shared_ptr<shape> > list){
+cout << ++num;
+        for(shared_ptr<shape> i:list){
             _shapes.push_back(i);
         }
     }
@@ -35,15 +42,15 @@ public:
             _shapes[i]->print(out);
         }
     }
-    ~layered(){}
+    ~layered(){cout << --num;}
 private:
-    vector<shape*> _shapes;
+    vector< shared_ptr<shape> > _shapes;
 };
 
 
 class rotated: public shape{
 public:
-    rotated(shape* shape,double ang){
+    rotated(shared_ptr<shape> shape,double ang){
         _shape=shape;
         _angle=ang;
         double pi=3.1415;
@@ -57,13 +64,13 @@ public:
     }
     ~rotated(){}
 private:
-    shape* _shape;
+    shared_ptr<shape> _shape;
     double _angle;
 };
 
 class scaled: public shape{
 public:
-    scaled(shape* toScale,double sX, double sY){
+    scaled(shared_ptr<shape> toScale,double sX, double sY){
         _theShape=toScale;
         _sX=sX;
         _sY=sY;
@@ -74,7 +81,7 @@ public:
         out << "grestore\n";
     }
 private:
-    shape* _theShape;
+    shared_ptr<shape> _theShape;
     double _sX;
     double _sY;
 };
@@ -135,6 +142,7 @@ private:
 class polygon: public shape{
 public:
     polygon(int sides,double length){
+cout << ++num;
         _sides=sides;
         _angle=2*3.1415/_sides;
         _radious=length/(sin(_angle/2)*2);
@@ -156,6 +164,7 @@ public:
             }
         out << "closepath\nstroke\n";
     }
+~polygon(){cout << --num;};
 private:
     void printPoint(ostream& out,int N){
         double pointAngle=_angleOffSet+N*_angle;
@@ -170,10 +179,11 @@ private:
 int main(){
     ofstream out("output.ps");
     out << "100 100 translate\n";
-    shape* toP=new polygon(3,40);
+    shared_ptr<shape> toP=make_shared<polygon>(3,40);
+
     for(int i=4;i<12;i++){
-        polygon* cir=new polygon(i,40);
-        toP=new layered({toP,cir});
+        shared_ptr<polygon> cir= make_shared<polygon>(i,40);
+        toP=shared_ptr<shape>(new layered({toP,cir}));
     }
     toP->print(out);
 /*
