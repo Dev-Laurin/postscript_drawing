@@ -17,9 +17,9 @@ using std::cout;
 using std::ostream;
 using std::vector;
 using std::initializer_list;
+using std::min;
+using std::max;
 
-//deleate this later::test for mem leeks;
-int num=0;
 
 class shape{
 public:
@@ -32,9 +32,14 @@ public:
 class layered: public shape{
 public:
     layered(initializer_list< shared_ptr<shape> > list){
-cout << ++num;
         for(shared_ptr<shape> i:list){
             _shapes.push_back(i);
+        }
+        _hitX=0;
+        _hitY=0;
+        for(int i=0;i<_shapes.size();i++){
+            _hitX=max(_hitX,_shapes[i]->_hitX);
+            _hitY=max(_hitY,_shapes[i]->_hitY);
         }
     }
     void print(ostream& out) override{
@@ -42,7 +47,6 @@ cout << ++num;
             _shapes[i]->print(out);
         }
     }
-    ~layered(){cout << --num;}
 private:
     vector< shared_ptr<shape> > _shapes;
 };
@@ -74,6 +78,8 @@ public:
         _theShape=toScale;
         _sX=sX;
         _sY=sY;
+        _hitX=_theShape->_hitX * _sX;
+        _hitY=_theShape->_hitY * _sY;
     }
     void print(ostream& out) override{
         out << "gsave\n" << _sX << " " << _sY << " scale\n";
@@ -85,6 +91,65 @@ private:
     double _sX;
     double _sY;
 };
+
+class vertical: public shape{
+public:
+    vertical(initializer_list< shared_ptr<shape> > list){
+        for(shared_ptr<shape> i:list){
+            _shapes.push_back(i);
+        }
+        _hitX=0;
+        _hitY=0;
+        for(int i=0;i<_shapes.size();i++){
+            _hitX=max(_hitX,_shapes[i]->_hitX);
+            _hitY+=_shapes[i]->_hitY;
+        }
+    }
+    void print(ostream& out) override{
+        out << "gsave\n0 " << -_hitY+_shapes[0]->_hitY << " translate\n";
+        _shapes[0]->print(out);
+        for(int i=1;i<_shapes.size();i++){
+            out << "0 " << _shapes[i-1]->_hitY+_shapes[i]->_hitY << " translate\n";
+            _shapes[i]->print(out);
+        }
+        out << "grestore\n";
+    }
+private:
+    vector< shared_ptr<shape> > _shapes;
+};
+
+class horizontal: public shape{
+public:
+    horizontal(initializer_list< shared_ptr<shape> > list){
+        for(shared_ptr<shape> i:list){
+            _shapes.push_back(i);
+        }
+        _hitX=0;
+        _hitY=0;
+        for(int i=0;i<_shapes.size();i++){
+            _hitY=max(_hitY,_shapes[i]->_hitY);
+            _hitX+=_shapes[i]->_hitX;
+        }
+    }
+    void print(ostream& out) override{
+        out << "gsave\n" << -_hitX+_shapes[0]->_hitX << " 0 " << " translate\n";
+        _shapes[0]->print(out);
+        for(int i=1;i<_shapes.size();i++){
+            out << _shapes[i-1]->_hitX+_shapes[i]->_hitX << " 0 "  << " translate\n";
+            _shapes[i]->print(out);
+        }
+        out << "grestore\n";
+    }
+private:
+    vector< shared_ptr<shape> > _shapes;
+};
+
+
+
+
+
+
+
 
 
 
@@ -142,7 +207,6 @@ private:
 class polygon: public shape{
 public:
     polygon(int sides,double length){
-cout << ++num;
         _sides=sides;
         _angle=2*3.1415/_sides;
         _radious=length/(sin(_angle/2)*2);
@@ -164,7 +228,6 @@ cout << ++num;
             }
         out << "closepath\nstroke\n";
     }
-~polygon(){cout << --num;};
 private:
     void printPoint(ostream& out,int N){
         double pointAngle=_angleOffSet+N*_angle;
@@ -176,15 +239,44 @@ private:
     double _angleOffSet;
 };
 
+class square: public shape{
+public:
+    square(double length){
+        _poly=shared_ptr<polygon>(new polygon(4,length));
+        _hitX=_poly->_hitX;
+        _hitY=_poly->_hitY;
+    }
+    void print(ostream& out) override{
+        _poly->print(out);
+    }
+private:
+    shared_ptr<shape> _poly;
+};
+
+class triangle: public shape{
+public:
+    triangle(double length){
+        _poly=shared_ptr<polygon>(new polygon(4,length));
+        _hitX=_poly->_hitX;
+        _hitY=_poly->_hitY;
+    }
+    void print(ostream& out) override{
+        _poly->print(out);
+    }
+private:
+    shared_ptr<shape> _poly;
+};
+
 int main(){
     ofstream out("output.ps");
-    out << "100 100 translate\n";
-    shared_ptr<shape> toP=make_shared<polygon>(3,40);
+    out << "400 100 translate\n";
+    shared_ptr<shape> toP=make_shared<polygon>(3,10);
 
     for(int i=4;i<12;i++){
-        shared_ptr<polygon> cir= make_shared<polygon>(i,40);
-        toP=shared_ptr<shape>(new layered({toP,cir}));
+        shared_ptr<polygon> cir= make_shared<polygon>(i,20);
+        toP=shared_ptr<shape>(new vertical({toP,cir}));
     }
+    toP=shared_ptr<shape>(new horizontal({toP,toP,toP,toP,toP}));
     toP->print(out);
 /*
     rectangle rec(1,1);
