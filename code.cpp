@@ -269,7 +269,7 @@ private:
 
 int main(){
     ofstream out("output.ps");
-    out << "400 100 translate\n";
+    out << "200 400 translate\n";
     shared_ptr<shape> toP=make_shared<polygon>(3,10);
 
     for(int i=4;i<12;i++){
