@@ -137,32 +137,45 @@ public:
     polygon(int sides,double length){
         _sides=sides;
         _angle=2*3.1415/_sides;
-        _radious=sin(_angle/2)*2*length;
+        _radious=length/(sin(_angle/2)*2);
         _hitX=_radious;
         _hitY=_radious;
+        if((sides/2)*2==sides){
+            _angleOffSet=3.1415/2+_angle/2;
+        }else{
+            _angleOffSet=3.1415/2;
+        }
     }
     void print(ostream& out) override{
-        out << "newpath\n"
-            << "0 " << _radious << " moveto\n";
+        out << "newpath\n";
+        printPoint(out,0);
+        out << " moveto\n";
             for(int i=1;i<_sides;i++){
                 printPoint(out,i);
+                out << " lineto\n";
             }
         out << "closepath\nstroke\n";
     }
 private:
     void printPoint(ostream& out,int N){
-        double pointAngle=3.1415/2+N*_angle;
-        out << _radious*cos(pointAngle) << " " << _radious*sin(pointAngle) << " lineto\n";
+        double pointAngle=_angleOffSet+N*_angle;
+        out << _radious*cos(pointAngle) << " " << _radious*sin(pointAngle);
     }
     double _radious;
     double _angle;
     int _sides;
+    double _angleOffSet;
 };
 
 int main(){
     ofstream out("output.ps");
-    polygon cir(5,40);
-    cir.print(out);
+    out << "100 100 translate\n";
+    shape* toP=new polygon(3,40);
+    for(int i=4;i<12;i++){
+        polygon* cir=new polygon(i,40);
+        toP=new layered({toP,cir});
+    }
+    toP->print(out);
 /*
     rectangle rec(1,1);
     rotated rotrec({&rec},45);
