@@ -1,3 +1,11 @@
+//code.h
+//Group - Parker, Lucas, Laurin, Dain
+//Software Construction
+//4-8-16
+
+#ifndef CODE_H_INCLUDED
+#define CODE_H_INCLUDED
+
 #include <initializer_list>
 #include <vector>
 #include <iostream>
@@ -139,14 +147,4 @@ private:
     double _hight;
 };
 
-
-
-int main(){
-    ofstream out("output.ps");
-    rectangle rec(1,1);
-    rotated rotrec({&rec},45);
-    scaled scaleSquare(&rotrec,100,100);
-    scaled scaleSquare2(&rec,100,100);
-    layered top{&scaleSquare,&scaleSquare2};
-    top.print(out);
-}
+#endif /* CODE_H_INCLUDED */ 

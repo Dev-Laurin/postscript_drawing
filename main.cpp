@@ -6,23 +6,29 @@
 #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - 
 								//only do this in one cpp file
 #include <iostream>
+#include <fstream>
 #include "catch.hpp"
+#include "code.h"
+using std::ofstream;
+using std::cout; 
+using std::endl; 
 
 //Draw a Simple Square at (0,0)
 TEST_CASE("On Page One", "Draw a Square"){
 	//Make a Square
-	Square s1(0,0); // Draw a Square in (x,y)
-	REQUIRE( s1.printPostscript() == "/box {
-									newpath
-									moveto
-									72 0 rlineto
-									0 72 rlineto
-									-72 0 rlineto
-									closepath
-									} def
-									gsave
-									0 0 box stroke
-									grestore"); 
+
+
+	//Parker's testing code, for now, saved
+	 ofstream out("output.ps");
+    rectangle rec(1,1);
+    rotated rotrec(&rec,45);
+    scaled scaleSquare(&rotrec,100,100);
+    scaled scaleSquare2(&rec,100,100);
+    layered top{&scaleSquare,&scaleSquare2};
+    top.print(out);
+
+	//rectangle r(1,1); 
+	REQUIRE( "" == ""); 
 }
 
 //Draw a Circle
