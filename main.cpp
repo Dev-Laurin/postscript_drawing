@@ -13,23 +13,50 @@ using std::ofstream;
 using std::cout; 
 using std::endl; 
 
+ofstream out("output.ps"); //The postscipt file
+int inch = 72; //Units in postscript
+
+
 //Draw a Simple Square at (0,0)
-TEST_CASE("On Page One", "Draw a Square"){
-	//Make a Square
+TEST_CASE("Draw a Square", "On Page One"){
+	SECTION("Draw the Default Square: 1 Inch"){
+		//Make a Default Square
+		ofstream test1;  
+		square s1(inch); 
+		s1.print(test1); 
 
+		s1.print(out); //Put on Page 1 
 
-	//Parker's testing code, for now, saved
-	 ofstream out("output.ps");
-    rectangle rec(1,1);
-    rotated rotrec(&rec,45);
-    scaled scaleSquare(&rotrec,100,100);
-    scaled scaleSquare2(&rec,100,100);
-    layered top{&scaleSquare,&scaleSquare2};
-    top.print(out);
+		//The postscript code that s1 should output
+		ofstream answer; 
+		answer << "newpath\n";  
+			answer << -0.5*inch << " " << -0.5*inch << " moveto\n"; 
+			answer << -0.5*inch << " " << 0.5*inch << " lineto\n"; 
+			answer << 0.5*inch << " " << 0.5*inch << " lineto\n"; 
+			answer << 0.5*inch << " " << -0.5*inch << " lineto\n"; 
+			answer << "closepath\n" << "stroke" << endl; 
 
-	//rectangle r(1,1); 
-	REQUIRE( "" == ""); 
+		REQUIRE(test1 == answer); 
+	}
+
+	SECTION("Draw a Square at (10,10)"){
+		REQUIRE("" == ""); 
+	}
 }
+
+	//
+//Parker's main.cpp code
+    // ofstream out("output.ps");
+    // out << "200 400 translate\n";
+    // shared_ptr<shape> toP=make_shared<polygon>(3,10);
+
+    // for(int i=4;i<12;i++){
+    //     shared_ptr<polygon> cir= make_shared<polygon>(i,20);
+    //     toP=shared_ptr<shape>(new vertical({toP,cir}));
+    // }
+    // toP=shared_ptr<shape>(new horizontal({toP,toP,toP,toP,toP}));
+    // toP->print(out);
+
 
 //Draw a Circle
 

@@ -33,8 +33,8 @@ class shape{
 public:
     virtual ~shape(){}
     virtual void print(ostream& out) =0;
-    double _hitX;
-    double _hitY;
+    double _hitX =10;
+    double _hitY =10;
 };
 
 class layered: public shape{
