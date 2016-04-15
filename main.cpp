@@ -44,9 +44,60 @@ TEST_CASE("Draw a Square", "On Page One"){
 	}
 }
 
+TEST_CASE("Draw a Rectangle", "On Page One"){
+	SECTION("Draw the Default Rectangle: 2x4 Inches"){
+		//Make a Default Square
+		ofstream test1;  
+		rectangle r1(inch*2, inch*4); 
+		r1.print(test1); 
+
+		r1.print(out); //Put on Page 1 
+
+		//The postscript code that s1 should output
+		ofstream answer; 
+		answer << "newpath\n";  
+			answer << -0.5*inch << " " << -0.5*inch << " moveto\n"; 
+			answer << -0.5*inch << " " << 0.5*inch << " lineto\n"; 
+			answer << 0.5*inch << " " << 0.5*inch << " lineto\n"; 
+			answer << 0.5*inch << " " << -0.5*inch << " lineto\n"; 
+			answer << "closepath\n" << "stroke" << endl; 
+
+		REQUIRE(test1 == answer); 
+	}
+
+	SECTION("Draw a Rectangle at (10,10)"){
+		REQUIRE("" == ""); 
+	}
+}
+
+TEST_CASE("Draw a Triangle", "On Page One"){
+	SECTION("Draw the Default Triangle: 1 Inch"){
+		//Make a Default Square
+		ofstream test1;  
+		triangle t1(inch*5); 
+		t1.print(test1); 
+
+		t1.print(out); //Put on Page 1 
+
+		//The postscript code that s1 should output
+		// ofstream answer; 
+		// answer << "newpath\n";  
+		// 	answer << -0.5*inch << " " << -0.5*inch << " moveto\n"; 
+		// 	answer << -0.5*inch << " " << 0.5*inch << " lineto\n"; 
+		// 	answer << 0.5*inch << " " << 0.5*inch << " lineto\n"; 
+		// 	answer << 0.5*inch << " " << -0.5*inch << " lineto\n"; 
+		// 	answer << "closepath\n" << "stroke" << endl; 
+
+		// REQUIRE(test1 == answer); 
+	}
+
+	SECTION("Draw a Triangle at (10,10)"){
+		REQUIRE("" == ""); 
+	}
+}
 	//
 //Parker's main.cpp code
-    // ofstream out("output.ps");
+  //  ofstream out("output.ps");
     // out << "200 400 translate\n";
     // shared_ptr<shape> toP=make_shared<polygon>(3,10);
 
@@ -61,8 +112,6 @@ TEST_CASE("Draw a Square", "On Page One"){
 //Draw a Circle
 
 //Draw a Polygon
-
-//Draw a Rectangle
 
 //Draw a Spacer
 
