@@ -184,6 +184,7 @@ private:
 };
 
 class spacer: public shape{
+public:
     spacer(double width,double hight){
         _width=width;
         _hitX=_width/2;
