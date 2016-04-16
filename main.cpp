@@ -3,7 +3,7 @@
 //Software Construction
 //4-8-16
 
-#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - 
+//#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - 
 								//only do this in one cpp file
 #include <iostream>
 #include <fstream>
@@ -12,7 +12,17 @@
 using std::ofstream;
 using std::cout; 
 using std::endl; 
-
+int main() {
+	Point p(1, 2);
+	Point a;
+	a = p;
+	cout << a.getX() << a.getY() << endl;
+	a += p;
+	cout << a.getX() << a.getY() << endl;
+	a = a / 2;
+	cout << a.getX() << a.getY() << endl;
+}
+/*
 ofstream out("output.ps"); //The postscipt file
 int inch = 72; //Units in postscript
 
@@ -36,11 +46,11 @@ TEST_CASE("Draw a Square", "On Page One"){
 			answer << 0.5*inch << " " << -0.5*inch << " lineto\n"; 
 			answer << "closepath\n" << "stroke" << endl; 
 
-		REQUIRE(test1 == answer); 
+		//REQUIRE(test1 == answer); 
 	}
 
 	SECTION("Draw a Square at (10,10)"){
-		REQUIRE("" == ""); 
+		//REQUIRE("" == ""); 
 	}
 }
 
@@ -62,7 +72,7 @@ TEST_CASE("Draw a Rectangle", "On Page One"){
 			answer << 0.5*inch << " " << -0.5*inch << " lineto\n"; 
 			answer << "closepath\n" << "stroke" << endl; 
 
-		REQUIRE(test1 == answer); 
+		//REQUIRE(test1 == answer); 
 	}
 
 	SECTION("Draw a Rectangle at (10,10)"){
@@ -169,15 +179,16 @@ TEST_CASE("Draw a Spacer", "On Page One"){
 	SECTION("Draw a Triangle at (10,10)"){
 	}
 }
-	//
 //Parker's main.cpp code
-  //  ofstream out("output.ps");
-    // out << "200 400 translate\n";
-    // shared_ptr<shape> toP=make_shared<polygon>(3,10);
+/*
+    ofstream out("output.ps");
+    out << "200 400 translate\n";
+    shared_ptr<shape> toP=make_shared<polygon>(3,10);
 
-    // for(int i=4;i<12;i++){
-    //     shared_ptr<polygon> cir= make_shared<polygon>(i,20);
-    //     toP=shared_ptr<shape>(new vertical({toP,cir}));
-    // }
-    // toP=shared_ptr<shape>(new horizontal({toP,toP,toP,toP,toP}));
-    // toP->print(out);
+    for(int i=4;i<12;i++){
+         shared_ptr<polygon> cir= make_shared<polygon>(i,20);
+         toP=shared_ptr<shape>(new vertical({toP,cir}));
+    }
+    toP=shared_ptr<shape>(new horizontal({toP,toP,toP,toP,toP}));
+    toP->print(out);
+*/
