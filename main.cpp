@@ -7,8 +7,10 @@
 								//only do this in one cpp file
 #include <iostream>
 #include <fstream>
+#include <cmath>
 #include "catch.hpp"
 #include "code.h"
+using std::pow;
 using std::ofstream;
 using std::cout; 
 using std::endl; 
@@ -21,6 +23,15 @@ int main() {
 	cout << a.getX() << a.getY() << endl;
 	a = a / 2;
 	cout << a.getX() << a.getY() << endl;
+	ofstream out("output.ps");
+	out << "200 400 translate\n";
+	vector<Point> polyPoints;
+	for (int i = 0; i < 10; i++) {
+		Point temp(i * 10, pow(i, 2));
+		polyPoints.push_back(temp);
+	}
+	free_polygon polyCurve(polyPoints);
+	polyCurve.print(out);
 }
 /*
 ofstream out("output.ps"); //The postscipt file

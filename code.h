@@ -16,6 +16,7 @@
 using std::shared_ptr;
 using std::make_shared;
 using std::sqrt;
+using std::abs;
 using std::pow;
 using std::sin;
 using std::cos;
@@ -64,6 +65,12 @@ public:
 		Point t;
 		t._x = this->_x / d;
 		t._y = this->_y / d;
+		return t;
+	}
+	Point operator-(const Point& p) {
+		Point t;
+		t._x = this->_x - p._x;
+		t._y = this->_y - p._y;
 		return t;
 	}
 private:
@@ -321,22 +328,45 @@ private:
 class free_polygon : public shape {
 public:
 	free_polygon(vector<Point> points) {
+		double x_max = 0;
+		double y_max = 0;
 		Point centroid = get_centroid(points);
+		for (int i = 0; i < points.size(); i++) {
+			Point temp = points[i] - centroid;
+			_normalized_points.push_back(temp);
+		}
+		for (int i = 0; i < _normalized_points.size(); i++) {
+			x_max = max(abs(_normalized_points[i].getX()), x_max);
+			y_max = max(abs(_normalized_points[i].getY()), y_max);
+		}
+
 	}
 	void print(ostream& out) override {
 		out << "newpath\n";
-		printPoint(out, 0);
+		Point temp; // defaults to (0,0)
+		printPoint(out, temp);
+		out << " moveto\n";
+		for (int i = 1; i<_normalized_points.size(); i++) {
+			printPoint(out, _normalized_points[i]);
+			out << " lineto\n";
+		}
+		out << "closepath\nstroke\n";
 	}
 
 private:
-	void printPoint(ostream& out, int N) {
+	void printPoint(ostream& out, Point p) {
+		out << p.getX() << " " << p.getY();
 	}
 	Point get_centroid(vector<Point> points) {
 		Point total;
 		Point centroid;
 		for (int i = 0; i < points.size(); i++) {
+			total += points[i];
 		}
+		centroid = total / points.size();
+		return centroid;
 	}
+	vector<Point> _normalized_points;
 };
 
 #endif  CODE_H_INCLUDED  
