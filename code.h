@@ -28,13 +28,55 @@ using std::initializer_list;
 using std::min;
 using std::max;
 
+class Point{
+public:
+	Point() {
+		_x = 0;
+		_y = 0;
+	}
+	Point(double x, double y) {
+		_x = x;
+		_y = y;	
+	}
+	void setX(int x) {
+		_x = x;
+	}
+	void setY(int y) {
+		_y = y;
+	}
+	double getX() {
+		return _x;
+	}
+	double getY() {
+		return _y;
+	}
+	Point& operator=(Point p) {
+		this->_x = p._x;
+		this->_y = p._y;
+		return *this;
+	}
+	Point operator+=(const Point& p) {
+		this->_x = this->_x + p._x;
+		this->_y = this->_y + p._y;
+		return *this;
+	}
+	Point operator/(const double& d) {
+		Point t;
+		t._x = this->_x / d;
+		t._y = this->_y / d;
+		return t;
+	}
+private:
+	double _x;
+	double _y;
+};
 
 class shape{
 public:
     virtual ~shape(){}
     virtual void print(ostream& out) =0;
-    double _hitX;
-    double _hitY;
+    double _hitX =10;
+    double _hitY =10;
 };
 
 class layered: public shape{
@@ -163,53 +205,54 @@ private:
 
 class rectangle: public shape{
 public:
-    rectangle(double width,double hight){
+    rectangle(double width,double height){
         _width=width;
         _hitX=_width/2;
-        _hight=hight;
-        _hitY=_hight/2;
+        _height=height;
+        _hitY=_height/2;
     }
     void print(ostream& out) override{
         out << "newpath\n"
-            << -.5*_width << " " << -.5*_hight << " moveto\n"
-            << -.5*_width << " " << .5*_hight << " lineto\n"
-            << .5*_width << " " << .5*_hight << " lineto\n"
-            << .5*_width << " " << -.5*_hight << " lineto\n"
+            << -.5*_width << " " << -.5*_height << " moveto\n"
+            << -.5*_width << " " << .5*_height << " lineto\n"
+            << .5*_width << " " << .5*_height << " lineto\n"
+            << .5*_width << " " << -.5*_height << " lineto\n"
             << "closepath\nstroke\n";
     }
     ~rectangle(){}
 private:
     double _width;
-    double _hight;
+    double _height;
 };
 
 class spacer: public shape{
-    spacer(double width,double hight){
+public:
+    spacer(double width,double height){
         _width=width;
         _hitX=_width/2;
-        _hight=hight;
-        _hitY=_hight/2;
+        _height=height;
+        _hitY=_height/2;
     }
     void print(ostream& out) override{
     }
     ~spacer(){}
 private:
     double _width;
-    double _hight;
+    double _height;
 };
 
 class circle: public shape{
 public:
-    circle(double radious){
-        _radious=radious;
-        _hitX=_radious;
-        _hitY=_radious;
+    circle(double radius){
+        _radius=radius;
+        _hitX=_radius;
+        _hitY=_radius;
     }
     void print(ostream& out) override{
-        out << "0 0 " << _radious << " 0 360 arc stroke\n";
+        out << "0 0 " << _radius << " 0 360 arc stroke\n";
     }
 private:
-    double _radious;
+    double _radius;
 };
 
 class polygon: public shape{
@@ -217,9 +260,9 @@ public:
     polygon(int sides,double length){
         _sides=sides;
         _angle=2*3.1415/_sides;
-        _radious=length/(sin(_angle/2)*2);
-        _hitX=_radious;
-        _hitY=_radious;
+        _radius=length/(sin(_angle/2)*2);
+        _hitX=_radius;
+        _hitY=_radius;
         if((sides/2)*2==sides){
             _angleOffSet=3.1415/2+_angle/2;
         }else{
@@ -239,9 +282,9 @@ public:
 private:
     void printPoint(ostream& out,int N){
         double pointAngle=_angleOffSet+N*_angle;
-        out << _radious*cos(pointAngle) << " " << _radious*sin(pointAngle);
+        out << _radius*cos(pointAngle) << " " << _radius*sin(pointAngle);
     }
-    double _radious;
+    double _radius;
     double _angle;
     int _sides;
     double _angleOffSet;
@@ -275,7 +318,28 @@ private:
     shared_ptr<shape> _poly;
 };
 
-#endif /* CODE_H_INCLUDED */ 
+class free_polygon : public shape {
+public:
+	free_polygon(vector<Point> points) {
+		Point centroid = get_centroid(points);
+	}
+	void print(ostream& out) override {
+		out << "newpath\n";
+		printPoint(out, 0);
+	}
+
+private:
+	void printPoint(ostream& out, int N) {
+	}
+	Point get_centroid(vector<Point> points) {
+		Point total;
+		Point centroid;
+		for (int i = 0; i < points.size(); i++) {
+		}
+	}
+};
+
+#endif  CODE_H_INCLUDED  
 
 //To Test put in file main.cpp (catch testing framework)->
 
