@@ -77,6 +77,8 @@ private:
 	double _y;
 };
 
+
+//a pure virtual function that is a shape and has the ability to print to a o stream and knows its hitbox
 class shape{
 public:
     virtual ~shape(){}
@@ -85,6 +87,9 @@ public:
     double _hitY =10;
 };
 
+
+//a layed shape, takes a bunch of shapes by shared pointer and prints them on top of each other
+//its hitbox will be the largest x hitbox and independently the largest y hitbox
 class layered: public shape{
 public:
     layered(initializer_list< shared_ptr<shape> > list){
@@ -108,12 +113,15 @@ private:
 };
 
 
+//holds one shape and will rotate the screen before printing it
+//can rotate to any angle in degrees
 class rotated: public shape{
 public:
     rotated(shared_ptr<shape> shape,double ang){
         _shape=shape;
         _angle=ang;
         double pi=3.1415;
+        //this is some basic trig to figure out the new hitbox based on the previous hitbox
         _hitX=sqrt(pow(_shape->_hitX*cos(_angle*pi/180),2)+pow(_shape->_hitY*sin(_angle*pi/180),2));
         _hitY=sqrt(pow(_shape->_hitY*cos(_angle*pi/180),2)+pow(_shape->_hitX*sin(_angle*pi/180),2));
     }
@@ -128,6 +136,7 @@ private:
     double _angle;
 };
 
+//takes a object and prints it as a larger shape scaled in x and y
 class scaled: public shape{
 public:
     scaled(shared_ptr<shape> toScale,double sX, double sY){
@@ -148,6 +157,7 @@ private:
     double _sY;
 };
 
+//this creates a shape made out of many shapes stacked on top of each other
 class vertical: public shape{
 public:
     vertical(initializer_list< shared_ptr<shape> > list){
@@ -162,9 +172,10 @@ public:
         }
     }
     void print(ostream& out) override{
-        out << "gsave\n0 " << -_hitY+_shapes[0]->_hitY << " translate\n";
-        _shapes[0]->print(out);
+        out << "gsave\n0 " << -_hitY+_shapes[0]->_hitY << " translate\n"; //translate to the bottom of the object then up to where the center of the first shape shuld be
+        _shapes[0]->print(out);//print out the first shape
         for(int i=1;i<_shapes.size();i++){
+            //for the rest translate to the center of the shape and print
             out << "0 " << _shapes[i-1]->_hitY+_shapes[i]->_hitY << " translate\n";
             _shapes[i]->print(out);
         }
@@ -174,6 +185,7 @@ private:
     vector< shared_ptr<shape> > _shapes;
 };
 
+//basicaly the same as vertical but in the x direction
 class horizontal: public shape{
 public:
     horizontal(initializer_list< shared_ptr<shape> > list){
@@ -208,7 +220,7 @@ private:
 
 
 
-
+//basic shape, a rectangle
 class rectangle: public shape{
 public:
     rectangle(double width,double height){
@@ -231,6 +243,7 @@ private:
     double _height;
 };
 
+//a rectangle that doesn't print anything
 class spacer: public shape{
 public:
     spacer(double width,double height){
@@ -247,6 +260,7 @@ private:
     double _height;
 };
 
+//a basic shape, circle
 class circle: public shape{
 public:
     circle(double radius){
@@ -261,15 +275,16 @@ private:
     double _radius;
 };
 
+//a basic shape, a polygon of any number of sides
 class polygon: public shape{
 public:
     polygon(int sides,double length){
         _sides=sides;
-        _angle=2*3.1415/_sides;
-        _radius=length/(sin(_angle/2)*2);
+        _angle=2*3.1415/_sides; //the angle formed by a side when viewed from the center
+        _radius=length/(sin(_angle/2)*2); //how far from the center the vertecies are
         _hitX=_radius;
         _hitY=_radius;
-        if((sides/2)*2==sides){
+        if((sides/2)*2==sides){ //how far the shape has to be rotated so the right side fases down
             _angleOffSet=3.1415/2+_angle/2;
         }else{
             _angleOffSet=3.1415/2;
@@ -286,7 +301,7 @@ public:
         out << "closepath\nstroke\n";
     }
 private:
-    void printPoint(ostream& out,int N){
+    void printPoint(ostream& out,int N){//knows where each vertex is
         double pointAngle=_angleOffSet+N*_angle;
         out << _radius*cos(pointAngle) << " " << _radius*sin(pointAngle);
     }
@@ -296,6 +311,7 @@ private:
     double _angleOffSet;
 };
 
+//this object has a polygon wich is set to 4 sides
 class square: public shape{
 public:
     square(double length){
@@ -310,6 +326,7 @@ private:
     shared_ptr<shape> _poly;
 };
 
+//has a polygon with 3 sides
 class triangle: public shape{
 public:
     triangle(double length){
