@@ -29,6 +29,10 @@ using std::initializer_list;
 using std::min;
 using std::max;
 
+
+//Point class
+//helper class for storing and doing operations on 2D points
+//incomplete implementation, I am adding operations as I need them
 class Point{
 public:
 	Point() {
@@ -50,11 +54,6 @@ public:
 	}
 	double getY() {
 		return _y;
-	}
-	Point& operator=(Point p) {
-		this->_x = p._x;
-		this->_y = p._y;
-		return *this;
 	}
 	Point operator+=(const Point& p) {
 		this->_x = this->_x + p._x;
@@ -325,32 +324,35 @@ private:
     shared_ptr<shape> _poly;
 };
 
+//free_polygon class
+//creates a closed or open shape from a vector of Point objects
 class free_polygon : public shape {
 public:
-	free_polygon(vector<Point> points) {
-		double x_max = 0;
-		double y_max = 0;
+	//pass True in second argument for closed path, pass False for open path
+	free_polygon(vector<Point> points, bool close) {
 		Point centroid = get_centroid(points);
 		for (int i = 0; i < points.size(); i++) {
 			Point temp = points[i] - centroid;
 			_normalized_points.push_back(temp);
 		}
 		for (int i = 0; i < _normalized_points.size(); i++) {
-			x_max = max(abs(_normalized_points[i].getX()), x_max);
-			y_max = max(abs(_normalized_points[i].getY()), y_max);
+			_hitX = max(abs(_normalized_points[i].getX()), _hitX);
+			_hitY = max(abs(_normalized_points[i].getY()), _hitY);
 		}
+		_close = close;
 
 	}
 	void print(ostream& out) override {
 		out << "newpath\n";
 		Point temp; // defaults to (0,0)
-		printPoint(out, temp);
+		printPoint(out, _normalized_points[0]);
 		out << " moveto\n";
 		for (int i = 1; i<_normalized_points.size(); i++) {
 			printPoint(out, _normalized_points[i]);
 			out << " lineto\n";
 		}
-		out << "closepath\nstroke\n";
+		if(_close) out << "closepath\nstroke\n";
+		else out << "stroke\n";
 	}
 
 private:
@@ -367,6 +369,7 @@ private:
 		return centroid;
 	}
 	vector<Point> _normalized_points;
+	bool _close;
 };
 
 #endif  CODE_H_INCLUDED  

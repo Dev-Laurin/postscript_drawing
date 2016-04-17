@@ -17,6 +17,7 @@ using std::endl;
 int main() {
 	Point p(1, 2);
 	Point a;
+	cout << a.getX() << a.getY() << endl;
 	a = p;
 	cout << a.getX() << a.getY() << endl;
 	a += p;
@@ -30,8 +31,16 @@ int main() {
 		Point temp(i * 10, pow(i, 2));
 		polyPoints.push_back(temp);
 	}
-	free_polygon polyCurve(polyPoints);
+	free_polygon polyCurve(polyPoints, false);
 	polyCurve.print(out);
+	shared_ptr<shape> toP = make_shared<polygon>(3, 10);
+
+	for (int i = 4; i<12; i++) {
+		shared_ptr<polygon> cir = make_shared<polygon>(i, 20);
+		toP = shared_ptr<shape>(new vertical({ toP,cir }));
+	}
+	toP = shared_ptr<shape>(new horizontal({ toP,toP,toP,toP,toP }));
+	toP->print(out);
 }
 /*
 ofstream out("output.ps"); //The postscipt file
