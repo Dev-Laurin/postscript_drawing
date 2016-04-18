@@ -3,185 +3,273 @@
 //Software Construction
 //4-8-16
 
-//#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - 
+#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - 
 								//only do this in one cpp file
 #include <iostream>
 #include <fstream>
+#include <string>
+#include <sstream>
 #include "catch.hpp"
 #include "code.h"
 using std::ofstream;
 using std::cout; 
 using std::endl; 
-int main() {
-	Point p(1, 2);
-	Point a;
-	a = p;
-	cout << a.getX() << a.getY() << endl;
-	a += p;
-	cout << a.getX() << a.getY() << endl;
-	a = a / 2;
-	cout << a.getX() << a.getY() << endl;
-}
-/*
-ofstream out("output.ps"); //The postscipt file
-int inch = 72; //Units in postscript
+using std::ostringstream; 
 
+// int main() {
+// 	Point p(1, 2);
+// 	Point a;
+// 	a = p;
+// 	cout << a.getX() << a.getY() << endl;
+// 	a += p;
+// 	cout << a.getX() << a.getY() << endl;
+// 	a = a / 2;
+// 	cout << a.getX() << a.getY() << endl;
+// }
 
 //File to output postscript
 ofstream out("output.ps");
+double inch = 72.0; //Units in postscript
 
-//Draw a Simple Square at (0,0)
+
 TEST_CASE("Draw a Square", "On Page One"){
+
+	SECTION("Draw a Square of length 0"){
+		ostringstream test1; 
+		double length = inch * 0; 
+		square s1(length); 
+		s1.print(test1); 
+
+		s1.print(out); 
+
+		//The postscript code that s1 should output
+		ostringstream answer; 
+		answer << "newpath\n";  
+			answer << -0.5*length << " " << 0.5*length << " moveto\n"; 
+			answer << -0.5*length << " " << -0.5*length << " lineto\n"; 
+			answer << 0.5*length << " " << -0.5*length << " lineto\n"; 
+			answer << 0.5*length << " " << 0.5*length << " lineto\n"; 
+			answer << "closepath\n" << "stroke" << endl; 
+		REQUIRE(test1.str() == answer.str()); 
+	}
+
 	SECTION("Draw the Default Square: 1 Inch"){
 		//Make a Default Square
-		ofstream test1;  
+		ostringstream test1;   
 		square s1(inch); 
 		s1.print(test1); 
 
 		s1.print(out); //Put on Page 1 
 
 		//The postscript code that s1 should output
-		ofstream answer; 
+		ostringstream answer; 
 		answer << "newpath\n";  
-			answer << -0.5*inch << " " << -0.5*inch << " moveto\n"; 
-			answer << -0.5*inch << " " << 0.5*inch << " lineto\n"; 
-			answer << 0.5*inch << " " << 0.5*inch << " lineto\n"; 
+			answer << -0.5*inch << " " << 0.5*inch << " moveto\n"; 
+			answer << -0.5*inch << " " << -0.5*inch << " lineto\n"; 
 			answer << 0.5*inch << " " << -0.5*inch << " lineto\n"; 
+			answer << 0.5*inch << " " << 0.5*inch << " lineto\n"; 
 			answer << "closepath\n" << "stroke" << endl; 
 
-		//REQUIRE(test1 == answer); 
+		//Convert streams to strings for comparison
+		REQUIRE(test1.str() == answer.str()); 
 	}
 
-	SECTION("Draw a Square at (10,10)"){
-		//REQUIRE("" == ""); 
-	}
-}
+		SECTION("Draw a Square of arbitrary size"){
 
-TEST_CASE("Draw a Rectangle", "On Page One"){
-	SECTION("Draw the Default Rectangle: 2x4 Inches"){
-		//Make a Default Square
-		ofstream test1;  
-		rectangle r1(inch*2, inch*4); 
-		r1.print(test1); 
-
-		r1.print(out); //Put on Page 1 
-
-		//The postscript code that s1 should output
-		ofstream answer; 
-		answer << "newpath\n";  
-			answer << -0.5*inch << " " << -0.5*inch << " moveto\n"; 
-			answer << -0.5*inch << " " << 0.5*inch << " lineto\n"; 
-			answer << 0.5*inch << " " << 0.5*inch << " lineto\n"; 
-			answer << 0.5*inch << " " << -0.5*inch << " lineto\n"; 
-			answer << "closepath\n" << "stroke" << endl; 
-
-		//REQUIRE(test1 == answer); 
-	}
-
-	SECTION("Draw a Rectangle at (10,10)"){
-		REQUIRE("" == ""); 
-	}
-}
-
-TEST_CASE("Draw a Triangle", "On Page One"){
-	SECTION("Draw the Default Triangle: 1 Inch"){
-		//Make a Default Square
-		ofstream test1;  
-		triangle t1(inch*5); 
-		t1.print(test1); 
-
-		t1.print(out); //Put on Page 1 
-
-		//The postscript code that s1 should output
-		// ofstream answer; 
-		// answer << "newpath\n";  
-		// 	answer << -0.5*inch << " " << -0.5*inch << " moveto\n"; 
-		// 	answer << -0.5*inch << " " << 0.5*inch << " lineto\n"; 
-		// 	answer << 0.5*inch << " " << 0.5*inch << " lineto\n"; 
-		// 	answer << 0.5*inch << " " << -0.5*inch << " lineto\n"; 
-		// 	answer << "closepath\n" << "stroke" << endl; 
-
-		// REQUIRE(test1 == answer); 
-	}
-
-	SECTION("Draw a Triangle at (10,10)"){
-	}
-}
-
-TEST_CASE("Draw a Circle", "On Page One"){
-	SECTION("Draw the Default Circle: 1 Inch"){
-		//Make a Default Square
-		ofstream test1;  
-		circle c1(inch*6); 
-		c1.print(test1); 
-
-		c1.print(out); //Put on Page 1 
-
-		//The postscript code that s1 should output
-		// ofstream answer; 
-		// answer << "newpath\n";  
-		// 	answer << -0.5*inch << " " << -0.5*inch << " moveto\n"; 
-		// 	answer << -0.5*inch << " " << 0.5*inch << " lineto\n"; 
-		// 	answer << 0.5*inch << " " << 0.5*inch << " lineto\n"; 
-		// 	answer << 0.5*inch << " " << -0.5*inch << " lineto\n"; 
-		// 	answer << "closepath\n" << "stroke" << endl; 
-
-		// REQUIRE(test1 == answer); 
-	}
-
-	SECTION("Draw a Triangle at (10,10)"){
-	}
-}
-
-TEST_CASE("Draw a Polygon", "On Page One"){
-	SECTION("Draw the Default Polygon: 1 Inch"){
-		//Make a Default Square
-		ofstream test1;  
-		polygon p1(5, inch*6); 
-		p1.print(test1); 
-
-		p1.print(out); //Put on Page 1 
-
-		//The postscript code that s1 should output
-		// ofstream answer; 
-		// answer << "newpath\n";  
-		// 	answer << -0.5*inch << " " << -0.5*inch << " moveto\n"; 
-		// 	answer << -0.5*inch << " " << 0.5*inch << " lineto\n"; 
-		// 	answer << 0.5*inch << " " << 0.5*inch << " lineto\n"; 
-		// 	answer << 0.5*inch << " " << -0.5*inch << " lineto\n"; 
-		// 	answer << "closepath\n" << "stroke" << endl; 
-
-		// REQUIRE(test1 == answer); 
-	}
-
-	SECTION("Draw a Triangle at (10,10)"){
-	}
-}
-
-TEST_CASE("Draw a Spacer", "On Page One"){
-	SECTION("Draw the Default Spacer: 1 Inch"){
-		//Make a Default Square
-		ofstream test1;  
-		spacer s1(inch*2, inch*2); 
+		ostringstream test1;   
+		double length = inch * 5; 
+		square s1(length); 
 		s1.print(test1); 
 
 		s1.print(out); //Put on Page 1 
 
 		//The postscript code that s1 should output
-		// ofstream answer; 
-		// answer << "newpath\n";  
-		// 	answer << -0.5*inch << " " << -0.5*inch << " moveto\n"; 
-		// 	answer << -0.5*inch << " " << 0.5*inch << " lineto\n"; 
-		// 	answer << 0.5*inch << " " << 0.5*inch << " lineto\n"; 
-		// 	answer << 0.5*inch << " " << -0.5*inch << " lineto\n"; 
-		// 	answer << "closepath\n" << "stroke" << endl; 
-
-		// REQUIRE(test1 == answer); 
-	}
-
-	SECTION("Draw a Triangle at (10,10)"){
+		ostringstream answer; 
+		answer << "newpath\n";  
+			answer << -0.5*length << " " << 0.5*length << " moveto\n"; 
+			answer << -0.5*length << " " << -0.5*length << " lineto\n"; 
+			answer << 0.5*length << " " << -0.5*length << " lineto\n"; 
+			answer << 0.5*length << " " << 0.5*length << " lineto\n"; 
+			answer << "closepath\n" << "stroke" << endl; 
+		//Convert streams to strings for comparison
+		REQUIRE(test1.str() == answer.str()); 
 	}
 }
+
+TEST_CASE("Draw a Rectangle", "On Page One"){
+	SECTION("Draw a Rectangle of length 0"){
+		//Make a Default
+		ostringstream test1;  
+
+		double height = 0; 
+		double width = 0; 
+
+		rectangle r1(width, height); 
+		r1.print(test1); 
+
+		r1.print(out); //Put on Page 1 
+
+		//The postscript code that should output
+		ostringstream answer; 
+		answer << "newpath\n";  
+			answer << -0.5*width << " " << -0.5*height << " moveto\n"; 
+			answer << -0.5*width << " " << 0.5*height << " lineto\n"; 
+			answer << 0.5*width << " " << 0.5*height << " lineto\n"; 
+			answer << 0.5*width << " " << -0.5*height << " lineto\n"; 
+			answer << "closepath\n" << "stroke" << endl; 
+
+		REQUIRE(test1.str() == answer.str()); 
+	}
+
+	SECTION("Draw the Default Rectangle: 2x4 Inches"){
+		//Make a Default
+		ostringstream test1;  
+
+		double height = inch*4; 
+		double width = inch*2; 
+
+		rectangle r1(width, height); 
+		r1.print(test1); 
+
+		r1.print(out); //Put on Page 1 
+
+		//The postscript code that should output
+		ostringstream answer; 
+		answer << "newpath\n";  
+			answer << -0.5*width << " " << -0.5*height << " moveto\n"; 
+			answer << -0.5*width << " " << 0.5*height << " lineto\n"; 
+			answer << 0.5*width << " " << 0.5*height << " lineto\n"; 
+			answer << 0.5*width << " " << -0.5*height << " lineto\n"; 
+			answer << "closepath\n" << "stroke" << endl; 
+
+		REQUIRE(test1.str() == answer.str()); 
+	}
+
+	SECTION("Draw an arbitrary large Rectangle"){
+		//Make a Default
+		ostringstream test1;  
+
+		double height = inch*7; 
+		double width = inch*5; 
+
+		rectangle r1(width, height); 
+		r1.print(test1); 
+
+		r1.print(out); //Put on Page 1 
+
+		//The postscript code that should output
+		ostringstream answer; 
+		answer << "newpath\n";  
+			answer << -0.5*width << " " << -0.5*height << " moveto\n"; 
+			answer << -0.5*width << " " << 0.5*height << " lineto\n"; 
+			answer << 0.5*width << " " << 0.5*height << " lineto\n"; 
+			answer << 0.5*width << " " << -0.5*height << " lineto\n"; 
+			answer << "closepath\n" << "stroke" << endl; 
+
+		REQUIRE(test1.str() == answer.str()); 
+	}
+}
+
+
+TEST_CASE("Draw a Triangle", "On Page One"){
+	SECTION("Draw the Default Triangle: 1 Inch"){
+		//Make a Default
+		ostringstream test1;  
+
+		double length = inch; 
+		triangle t1(length); 
+		t1.print(test1); 
+
+		t1.print(out); //Put on Page 1 
+
+		//The postscript code that should output
+		ostringstream answer; 
+		answer << "newpath\n";  
+			answer << -0.5*length << " " << round(sin(60)*length) << " moveto\n"; 
+			answer << 0.5*length << " " << round(sin(60)*length) << " lineto\n"; 
+			answer << 0.5*length << " " << round(sin(60)*length) << " lineto\n"; 
+			answer << "closepath\n" << "stroke" << endl; 
+
+		REQUIRE(test1.str() == answer.str()); 
+	}
+}
+
+TEST_CASE("Draw a Circle", "On Page One"){
+		SECTION("Draw a Circle of radius 0"){
+		//Make a Default 
+		ostringstream test1; 
+		double length = inch * 0;  
+		circle c1(length); 
+		c1.print(test1); 
+
+		c1.print(out); //Put on Page 1 
+
+		//The postscript code that should output
+		ostringstream answer;   
+		answer << 0 << " " << 0 << " " << length << " "; 
+		answer << 0 << " " << 360 << " arc stroke" << endl; 
+
+		REQUIRE(test1.str() == answer.str()); 
+	}
+
+	SECTION("Draw the Default Circle: 1 Inch"){
+		//Make a Default 
+		ostringstream test1;  
+		circle c1(inch); 
+		c1.print(test1); 
+
+		c1.print(out); //Put on Page 1 
+
+		//The postscript code that should output
+		ostringstream answer;   
+		answer << 0 << " " << 0 << " " << inch << " "; 
+		answer << 0 << " " << 360 << " arc stroke" << endl; 
+
+		REQUIRE(test1.str() == answer.str()); 
+	}
+
+	SECTION("Draw an arbitrarily large Circle"){
+		//Make a Default 
+		ostringstream test1;  
+		double length = inch*5; 
+		circle c1(length); 
+		c1.print(test1); 
+
+		c1.print(out); //Put on Page 1 
+
+		//The postscript code that should output
+		ostringstream answer;   
+		answer << 0 << " " << 0 << " " << length << " "; 
+		answer << 0 << " " << 360 << " arc stroke" << endl; 
+
+		REQUIRE(test1.str() == answer.str()); 
+	}
+}
+
+TEST_CASE("Draw a Polygon", "On Page One"){
+	SECTION("Draw the Default Polygon: 1 Inch"){
+		//Make a Default
+		ostringstream test1;  
+		double length = inch*6; 
+		polygon p1(5, length); 
+		p1.print(test1); 
+
+		p1.print(out); //Put on Page 1 
+
+		//The postscript code that s1 should output
+		ostringstream answer; 
+		answer << "newpath\n";  
+			answer << -0.5*length << " " << -0.5*inch << " moveto\n"; 
+			answer << -0.5*inch << " " << 0.5*inch << " lineto\n"; 
+			answer << 0.5*inch << " " << 0.5*inch << " lineto\n"; 
+			answer << 0.5*inch << " " << -0.5*inch << " lineto\n"; 
+			answer << "closepath\n" << "stroke" << endl; 
+
+		REQUIRE(test1.str() == answer.str()); 
+	}
+}
+
+
 //Parker's main.cpp code
 /*
     ofstream out("output.ps");
@@ -194,4 +282,4 @@ TEST_CASE("Draw a Spacer", "On Page One"){
     }
     toP=shared_ptr<shape>(new horizontal({toP,toP,toP,toP,toP}));
     toP->print(out);
-*/
+*/ 

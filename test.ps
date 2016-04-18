@@ -1,0 +1,29 @@
+%!
+%%test.ps
+
+/inch {72 mul} def
+
+200 400 translate
+
+/triangle {
+	newpath
+	moveto
+	stack
+	0.5 inch 0.867 inch rlineto
+	0.5 inch -0.867 inch rlineto
+	closepath
+} def
+
+gsave
+100 100 triangle stroke
+grestore
+showpage
+
+newpath
+  -36 21 moveto
+  -0 -42 lineto
+  36 21 lineto
+  closepath
+  stroke
+
+showpage

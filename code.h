@@ -108,8 +108,8 @@ public:
         _shape=shape;
         _angle=ang;
         double pi=3.1415;
-        _hitX=sqrt(pow(_shape->_hitX*cos(_angle*pi/180),2)+pow(_shape->_hitY*sin(_angle*pi/180),2));
-        _hitY=sqrt(pow(_shape->_hitY*cos(_angle*pi/180),2)+pow(_shape->_hitX*sin(_angle*pi/180),2));
+        _hitX=sqrt(pow(_shape->_hitX*cos(_angle*pi/180.0),2.0)+pow(_shape->_hitY*sin(_angle*pi/180.0),2.0));
+        _hitY=sqrt(pow(_shape->_hitY*cos(_angle*pi/180.0),2.0)+pow(_shape->_hitX*sin(_angle*pi/180.0),2.0));
     }
     void print(ostream& out) override{
         out << "gsave\n" << _angle << " rotate\n";
@@ -259,14 +259,14 @@ class polygon: public shape{
 public:
     polygon(int sides,double length){
         _sides=sides;
-        _angle=2*3.1415/_sides;
-        _radius=length/(sin(_angle/2)*2);
+        _angle=2.0*3.1415/_sides;
+        _radius=length/(sin(_angle/2.0)*2.0);
         _hitX=_radius;
         _hitY=_radius;
-        if((sides/2)*2==sides){
-            _angleOffSet=3.1415/2+_angle/2;
+        if((sides/2.0)*2.0==sides){
+            _angleOffSet=3.1415/2.0+_angle/2.0;
         }else{
-            _angleOffSet=3.1415/2;
+            _angleOffSet=3.1415/2.0;
         }
     }
     void print(ostream& out) override{
@@ -282,7 +282,8 @@ public:
 private:
     void printPoint(ostream& out,int N){
         double pointAngle=_angleOffSet+N*_angle;
-        out << _radius*cos(pointAngle) << " " << _radius*sin(pointAngle);
+        out << std::round(_radius*cos(pointAngle));
+        out << " " << std::round(_radius*sin(pointAngle));
     }
     double _radius;
     double _angle;
@@ -307,7 +308,7 @@ private:
 class triangle: public shape{
 public:
     triangle(double length){
-        _poly=shared_ptr<polygon>(new polygon(4,length));
+        _poly=shared_ptr<polygon>(new polygon(3,length));
         _hitX=_poly->_hitX;
         _hitY=_poly->_hitY;
     }
@@ -339,13 +340,11 @@ private:
 	}
 };
 
-#endif  CODE_H_INCLUDED  
-
 //To Test put in file main.cpp (catch testing framework)->
 
 // int main(){
 //     ofstream out("output.ps");
-//     out << "200 400 translate\n";
+    
 //     shared_ptr<shape> toP=make_shared<polygon>(3,10);
 
 //     for(int i=4;i<12;i++){
@@ -363,3 +362,5 @@ private:
 //     top.print(out);*/
 // }
 // <-
+
+#endif  /* CODE_H_INCLUDED  */
