@@ -13,6 +13,8 @@
 #include <fstream>
 #include <cmath>
 #include <memory>
+#include <functional>
+using std::function;
 using std::shared_ptr;
 using std::make_shared;
 using std::sqrt;
@@ -389,6 +391,47 @@ private:
 	}
 	vector<Point> _normalized_points;
 	bool _close;
+};
+
+
+class functionShape: public shape{
+public:
+	functionShape(function<double (double)> func,double minTheta,double maxTheta,double dTheta){
+		_func=func;
+		_min=minTheta;
+		_max=maxTheta;
+		_dt=dTheta;
+		_hitX=0;
+		_hitY=0;
+		for(double ang=_min;ang<=_max;ang+=_dt){
+			_hitX=max(_hitX,abs(_func(ang)*cos(toRad(ang))));
+			_hitY=max(_hitY,abs(_func(ang)*sin(toRad(ang))));
+		}
+	}
+	void print(ostream& out) override {
+		out << "newpath\n";
+		printPoint(out,_min);
+		out << " moveto\n";
+		for(double ang=_min+_dt;ang<=_max;ang+=_dt){
+			printPoint(out,ang);
+			out << " lineto\n";
+		}
+		out << "closepath\nstroke\n";
+	}
+private:
+	void printPoint(ostream& out, double ang){
+		out << _func(ang)*cos(toRad(ang)) << " " << _func(ang)*sin(toRad(ang));
+	}
+	double toDeg(double rad){
+		return rad*360/3.1415;
+	}
+	double toRad(double deg){
+		return deg*3.1415/360;
+	}
+	function<double (double)> _func;
+	double _min;
+	double _max;
+	double _dt;
 };
 
 //To Test put in file main.cpp (catch testing framework)->
