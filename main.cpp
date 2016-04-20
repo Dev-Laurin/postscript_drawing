@@ -22,35 +22,35 @@ using std::ostringstream;
  int main() {
  	ofstream out("output.ps");
  	out << "200 400 translate\n";
- 	shared_ptr<shape> toP = make_shared<polygon>(3, 10);
-	toP = shared_ptr<shape>(new set_fill(toP, 0));
-	toP = shared_ptr<shape>(new set_stroke(toP, 1, 0));
+ 	std::shared_ptr<shape> toP = std::make_shared<polygon>(3, 10);
+	toP = std::shared_ptr<shape>(new set_fill(toP, 0));
+	toP = std::shared_ptr<shape>(new set_stroke(toP, 1, 0));
  	for (int i = 4; i<12; i++) {
- 		shared_ptr<shape> cir = make_shared<polygon>(i, 20);
-		cir = shared_ptr<shape>(new set_fill(cir, 0.1*i));
-		cir = shared_ptr<shape>(new set_stroke(cir, 0.1*i, 1 - 0.1*i));
- 		toP = shared_ptr<shape>(new vertical({ toP,cir }));
+ 		std::shared_ptr<shape> cir = std::make_shared<polygon>(i, 20);
+		cir = std::shared_ptr<shape>(new set_fill(cir, 0.1*i));
+		cir = std::shared_ptr<shape>(new set_stroke(cir, 0.1*i, 1 - 0.1*i));
+ 		toP = std::shared_ptr<shape>(new vertical({ toP,cir }));
  	}
- 	toP = shared_ptr<shape>(new horizontal({ toP,toP,toP,toP,toP }));
-	toP = shared_ptr<shape>(new page({ toP }));
+ 	toP = std::shared_ptr<shape>(new horizontal({ toP,toP,toP,toP,toP }));
+	toP = std::shared_ptr<shape>(new page({ toP }));
  	toP->print(out);
 	out << "200 400 translate\n";
-	shared_ptr<shape> toP2 = make_shared<polygon>(3, 10);
-	toP2 = shared_ptr<shape>(new set_fill(toP2, 0));
-	toP2 = shared_ptr<shape>(new set_stroke(toP2, 0, 0));
+	std::shared_ptr<shape> toP2 = std::make_shared<polygon>(3, 10);
+	toP2 = std::shared_ptr<shape>(new set_fill(toP2, 0));
+	toP2 = std::shared_ptr<shape>(new set_stroke(toP2, 0, 0));
 	for (int i = 4; i<12; i++) {
-		shared_ptr<shape> cir = make_shared<polygon>(i, 20);
-		cir = shared_ptr<shape>(new set_fill(cir, 0.1*i,0,0));
-		cir = shared_ptr<shape>(new set_stroke(cir, 0.3*i, 0, 0.1*i,0));
-		toP2 = shared_ptr<shape>(new vertical({ toP2,cir }));
+		std::shared_ptr<shape> cir = std::make_shared<polygon>(i, 20);
+		cir = std::shared_ptr<shape>(new set_fill(cir, 0.1*i,0,0));
+		cir = std::shared_ptr<shape>(new set_stroke(cir, 0.3*i, 0, 0.1*i,0));
+		toP2 = std::shared_ptr<shape>(new vertical({ toP2,cir }));
 	}
-	toP2 = shared_ptr<shape>(new horizontal({ toP2,toP2,toP2,toP2,toP2 }));
-	toP2 = shared_ptr<shape>(new scaled(toP2, 0.5,0.5));
-	toP2 = shared_ptr<shape>(new rotated(toP2, 30));
-	toP2 = shared_ptr<shape>(new page({ toP2 }));
+	toP2 = std::shared_ptr<shape>(new horizontal({ toP2,toP2,toP2,toP2,toP2 }));
+	toP2 = std::shared_ptr<shape>(new scaled(toP2, 0.5,0.5));
+	toP2 = std::shared_ptr<shape>(new rotated(toP2, 30));
+	toP2 = std::shared_ptr<shape>(new page({ toP2 }));
 	toP2->print(out);
 	out << "200 400 translate\n";
-	vector<Point> polyPoints;
+	std::vector<Point> polyPoints;
 	Point a(0, 0);
 	Point b(0, 4 * 72);
 	Point c(2 * 72, 2 * 72);
@@ -59,17 +59,17 @@ using std::ostringstream;
 	polyPoints.push_back(b);
 	polyPoints.push_back(c);
 	polyPoints.push_back(d);
-	shared_ptr<shape> polyPage = make_shared<free_polygon>(polyPoints, true);
-	polyPage = shared_ptr<shape>(new set_fill(polyPage, 0, 0, 1));
-	polyPage = shared_ptr<shape>(new page({ polyPage }));
+	std::shared_ptr<shape> polyPage = std::make_shared<free_polygon>(polyPoints, true);
+	polyPage = std::shared_ptr<shape>(new set_fill(polyPage, 0, 0, 1));
+	polyPage = std::shared_ptr<shape>(new page({ polyPage }));
 	polyPage->print(out);
 	out << "200 400 translate\n";
 	auto rose = [](auto ang){
 		double rad = cos(5*(ang*3.1415/360)) * 72;
 		return rad;
 	};
-	shared_ptr<shape> funcShape = make_shared<functionShape>(rose, 0, 360, 0.1);
-	funcShape = shared_ptr<shape>(new page({ funcShape }));
+	std::shared_ptr<shape> funcShape = std::make_shared<functionShape>(rose, 0, 360, 0.1);
+	funcShape = std::shared_ptr<shape>(new page({ funcShape }));
 	funcShape->print(out);
  }
  */
@@ -381,7 +381,7 @@ TEST_CASE("Draw Compound Shape Rotated", "On Page Two"){
 		double length = inch; 
 		int angle = 45; 
 
-		shared_ptr<shape> sqPtr = make_shared<square>(length); 
+		std::shared_ptr<shape> sqPtr = std::make_shared<square>(length); 
 		rotated r1(sqPtr, angle); 
 
 		r1.print(out); //To postscript page
@@ -407,9 +407,9 @@ TEST_CASE("Draw Compound Shape: Vertical", "On Page Two"){
 		ostringstream test1; 
 		double length = inch; 
 		
-		shared_ptr<shape> sqPtr = make_shared<square>(length); 
-		shared_ptr<shape> cPtr = make_shared<circle>(length); 
-		shared_ptr<shape> sqPtr2 = make_shared<square>(length); 
+		std::shared_ptr<shape> sqPtr = std::make_shared<square>(length); 
+		std::shared_ptr<shape> cPtr = std::make_shared<circle>(length); 
+		std::shared_ptr<shape> sqPtr2 = std::make_shared<square>(length); 
 
 		vertical v({sqPtr,cPtr,sqPtr2}); 
 
@@ -453,9 +453,9 @@ TEST_CASE("Draw a Compound Shape: Horizontal", "On Page 2"){
 		ostringstream test1; 
 		double length = inch; 
 		
-		shared_ptr<shape> sqPtr = make_shared<square>(length); 
-		shared_ptr<shape> cPtr = make_shared<circle>(length); 
-		shared_ptr<shape> sqPtr2 = make_shared<square>(length); 
+		std::shared_ptr<shape> sqPtr = std::make_shared<square>(length); 
+		std::shared_ptr<shape> cPtr = std::make_shared<circle>(length); 
+		std::shared_ptr<shape> sqPtr2 = std::make_shared<square>(length); 
 
 		horizontal h({sqPtr,cPtr,sqPtr2}); 
 
@@ -502,9 +502,9 @@ TEST_CASE("Draw a Compound Shape: Layered", "On Page 3"){
 		ostringstream test1; 
 		double length = inch; 
 		
-		shared_ptr<shape> sqPtr = make_shared<square>(length); 
-		shared_ptr<shape> cPtr = make_shared<circle>(length); 
-		shared_ptr<shape> poPtr = make_shared<polygon>(5,length);
+		std::shared_ptr<shape> sqPtr = std::make_shared<square>(length); 
+		std::shared_ptr<shape> cPtr = std::make_shared<circle>(length); 
+		std::shared_ptr<shape> poPtr = std::make_shared<polygon>(5,length);
 
 		layered l({sqPtr,cPtr,poPtr}); 
 
@@ -544,7 +544,7 @@ TEST_CASE("Draw a Compound Shape: Scaled", "On Page 3"){
 		double xScaledFactor = 2; 
 		double YScaledFactor = 3; 
 		
-		shared_ptr<shape> sqPtr = make_shared<square>(length); 
+		std::shared_ptr<shape> sqPtr = std::make_shared<square>(length); 
 
 		scaled s(sqPtr, xScaledFactor, YScaledFactor); 
 
@@ -572,7 +572,7 @@ TEST_CASE("Draw a Free Polygon (non-symmetric)", "On Page 4"){
 	out << "200 400 translate\n";
 	SECTION("Draw a Free Polygon, 4 different non-symmetric points"){
 		ostringstream test1; 
-		vector <Point> pts; 
+		std::vector <Point> pts; 
 
 		Point p1; //(0,0)
 		Point p2(1,1); 
