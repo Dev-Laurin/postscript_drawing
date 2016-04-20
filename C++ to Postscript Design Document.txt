@@ -1,0 +1,45 @@
+**Design Document for C++ to postscript library produced by Group 2 of CS372 2016**
+
+The current code base is contained in the code.h file and this file must be included in any project.
+
+
+--BASICS--
+The project will include a "Point" class meant to help with the manipulation of 2D points. This class will contain an X and Y value as well as allowing the addition and subtraction of points (as per vector addition) anf the ability to scale points by dividing them.
+
+The majority of the project will derive from the "shape" class, which will be a virtual/abstract class. It will contain a virtual destructor, a print function that takes an ostream, the hit box (noted as an x distance abd a y distance from center) as well was information on fill.
+
+
+--CONTAINER and TRANSFORM SHAPES--
+The "layered" shape will derive from shape and contain a vector of shape pointers. It will have a constructor taking an augment of initializer_list< shared_ptr<shape> > and the print function overriden to print out all the shapes on top of each other to handle this.
+
+The "rotated" shape will derive from shape and contain a double recording the rotation as well as a shared pointer to a shape to draw rotated. The constructor will take both these inputs and the print funtion will be overriden to include the rotation.
+
+The "scaled" shape will derive from shape and contain two doubles recording the scaling (in x and y respectively) as well as a shared pointer to a shape to draw rotated. The constructor will take these inputs and the print funtion will be overriden to include the scaling.
+
+The "vertical" shape will derive from shape and contain a vector of shape pointers. It will have a constructor taking an augment of initializer_list< shared_ptr<shape> > and the print function overriden to print out all the shapes upward in a vertical stack with each hit box just touching.
+
+The "horizontal" shape will work as the "vertical" shape but sideways to the right instead of in an upward vertical stack.
+
+The "set_stroke" shape will derive from shape and contain five doubles recording the coloring (three for rgb, one for gray) and linewidth of the shape, a boolean (to record the use of color or gray), as well as a shared pointer to a shape to draw with the modified stroke. The two constructors will take either the color or gray inputs along with the linewidth and set the boolean appropreately and the print funtion will be overriden to include the stroke modifications.
+
+The "set_fill" shape will derive from shape and contain a shared pointer to a shape to draw. Two constructors will take either the shape and three droubles for rgb color or the shape and one adouble for gray. The contained shape's settings will be adjusted by the constructor. This unulual constuction is required by the odd behavior of postscript's fill functionality as fill needs to be called after the lines are drawn but before stroke is. Two helper functions will also help with this.
+
+The "page" shape will derive from shape and contain a vector of shape pointers. It will have a constructor taking an augment of initializer_list< shared_ptr<shape> > and the print function overriden to call print on all the shapes it contains and also append the "showpage" command.
+
+
+--BASE SHAPES--
+The "rectangle" shape will derive from shape and contain two doubles recording the height and width of the rectangle as centered about the current 0,0 (defaults to bottom left corner). The constructor will take these values and the print funtion will be overriden to draw the shape in question. The shape will also have a destructor.
+
+The "spacer" shape will derive from shape and contain two doubles recording the height and width of a blank rectangle as centered about the current 0,0 (defaults to bottom left corner). The constructor will take these values and the print funtion will be overriden to not draw anything. The shape will also have a destructor.
+
+The "circle" shape will derive from shape and contain a double recording the radius of the circle as centered about the current 0,0 (defaults to bottom left corner). The constructor will take the radius and the print funtion will be overriden to draw the shape in question. The shape will also have a destructor.
+
+The "polygon" shape will derive from shape and contain one int indicating the number of sides, three doubles recording the radius, angle and angleOffSet of the polygon as centered about the current 0,0 (defaults to bottom left corner). The constructor will take the number of sides and their length and compute the rest of the values. The print funtion will be overriden to draw the shape in question. There will also be a printPoint function to help with the printing.
+
+The "square" shape will derive from shape and contain a pointer to a polygon shape. The constructor will take a length for the sides and create a four sided polygon to store. Print will be overriden to draw the poly gon.
+
+The "triangle" shape will work as square save that it wll create a thre sided polygon in its constructor.
+
+The "free_polygon" shape will derive from shape and contain a vector of "Points" as well as a boolean indicating a closed or open path. The constructor will take these values and the print funtion will be overriden to draw a chain of lines bettwen these points. There will also be a printPoint function to help with the printing.
+
+The "functionShape" shape will derive from "shape" and contain a function, three doubles containing minTHeta, maxTheta and dTheta. The constructor will take these values.The print funtion will be overriden to draw a chain of lines bettwen points determined but operating the function on minTheta+(dTheta*n) were n is the number of points so far. This chain will stop when minTheta+(dTheta*n) is greater than maxTheta. There will also be a printPoint function to help with the printing as well as "toDeg" and "toRad" functions to help with angle conversions.
