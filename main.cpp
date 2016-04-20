@@ -18,41 +18,6 @@ using std::cout;
 using std::endl; 
 using std::ostringstream; 
 
-/*
- int main() {
- 	Point p(1, 2);
- 	Point a;
-	cout << a.getX() << a.getY() << endl;
- 	a = p;
- 	cout << a.getX() << a.getY() << endl;
- 	a += p;
- 	cout << a.getX() << a.getY() << endl;
- 	a = a / 2;
-	cout << a.getX() << a.getY() << endl;
- 	ofstream out("output.ps");
- 	out << "200 400 translate\n";
- 	vector<Point> polyPoints;
- 	for (int i = 0; i < 10; i++) {
- 		Point temp(i * 10, pow(i, 2));
- 		polyPoints.push_back(temp);
- 	}
- 	shared_ptr<shape> toP = make_shared<polygon>(3, 10);
-
- 	for (int i = 4; i<12; i++) {
- 		shared_ptr<polygon> cir = make_shared<polygon>(i, 20);
- 		toP = shared_ptr<shape>(new vertical({ toP,cir }));
- 	}
- 	toP = shared_ptr<shape>(new horizontal({ toP,toP,toP,toP,toP }));
-	toP = shared_ptr<shape>(new set_stroke(toP, 3, 0.75));
-	toP = shared_ptr<shape>(new page({ toP }));
- 	toP->print(out);
-	shared_ptr<shape> polyPage = make_shared<free_polygon>(polyPoints, false);
-	polyPage = shared_ptr<shape>(new page({ polyPage }));
-	out << "200 400 translate\n";
-	polyPage->print(out);
- }
-*/
-
 //File to output postscript
 ofstream out("testing.ps");
 double inch = 72.0; //Units in postscript
@@ -543,4 +508,37 @@ TEST_CASE("Draw a Compound Shape: Scaled", "On Page 3"){
 	}
 }
 //TEST OUR OWN SHAPES
+TEST_CASE("Draw a Free Polygon (non-symmetric)", "On Page 4"){
+	//New page
+	out << "showpage" << endl; 
+	out << "200 400 translate\n";
+	SECTION("Draw a Free Polygon, 4 different non-symmetric points"){
+		ostringstream test1; 
+		vector <Point> pts; 
 
+		Point p1; //(0,0)
+		Point p2(1,1); 
+		Point p3(3,-5); 
+		Point p4(1,-2); 
+		
+		pts.push_back(p1); 
+		pts.push_back(p2); 
+		pts.push_back(p3); 
+		pts.push_back(p4); 
+
+		free_polygon fp(pts,true); 
+
+		fp.print(out); //To postscript page
+		fp.print(test1); //For testing only
+
+		ostringstream answer; 
+		answer << "newpath\n";  
+		answer << -1.25 << " " << 1.5 << " moveto\n"; 
+		answer << -0.25 << " " << 2.5 << " lineto\n"; 
+		answer << 1.75 << " " << -3.5 << " lineto\n"; 
+		answer << -0.25 << " " << -0.5 << " lineto\n"; 
+		answer << "closepath\n" << "stroke" << endl; 
+
+		REQUIRE(test1.str() == answer.str()); 
+	}
+}
