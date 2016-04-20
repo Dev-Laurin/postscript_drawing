@@ -13,6 +13,8 @@
 #include <fstream>
 #include <cmath>
 #include <memory>
+#include <functional>
+using std::function;
 using std::shared_ptr;
 using std::make_shared;
 using std::sqrt;
@@ -60,7 +62,7 @@ public:
 		this->_y = this->_y + p._y;
 		return *this;
 	}
-	Point operator/(const double& d) {
+	Point operator/(double d) {
 		Point t;
 		t._x = this->_x / d;
 		t._y = this->_y / d;
@@ -87,6 +89,8 @@ public:
     double _hitY =10;
 };
 
+
+//section for shape groups and alignment
 
 //a layed shape, takes a bunch of shapes by shared pointer and prints them on top of each other
 //its hitbox will be the largest x hitbox and independently the largest y hitbox
@@ -214,12 +218,76 @@ private:
 };
 
 
+//class takes a shared_ptr<shape> object plus a line width variable
+//    plus three color variables and appends gsave/n (n) setlinewidth/n (n) (n) (n) setrgbcolor/n ... grestore/n to the print
+//OR takes a single color variable, which indicates grayscale and appends gsave/n (n) setlinewidth/n (n) setgray/n ... grestore/n to the print
+//PRECONDITION: all passed variables must be positive 
+//Note that setting the line width to greater than 1 can cause overlap in aligned objects.
+class set_stroke : public shape {
+public:
+	set_stroke(shared_ptr<shape> s, double line_width, double red, double green, double blue) {
+		_the_shape = s;
+		_line_width = line_width;
+		_red = red;
+		_green = green;
+		_blue = blue;
+		_color = true;
+	}
+	set_stroke(shared_ptr<shape> s, double line_width, double gray) {
+		_the_shape = s;
+		_line_width = line_width;
+		_gray = gray;
+		_color = false;
+	}
+	void print(ostream& out) override {
+		if (_color) {
+			out << "gsave\n" << _line_width << " setlinewidth\n" << _red << " " << _green << " " << _blue << " setrgbcolor\n";
+			_the_shape->print(out);
+			out << " grestore\n";
+		}
+		else {
+			out << "gsave\n" << _line_width << " setlinewidth\n" << _gray << " setgray\n ";
+			_the_shape->print(out);
+			out << "grestore\n";
+		}
+	}
+private:
+	shared_ptr<shape> _the_shape;
+	double _line_width;
+	double _red;
+	double _green;
+	double _blue;
+	double _gray;
+	bool _color;
+};
+
+//NOTE: set_fill will require significantly more work, as the shape paths are destroyed in postscript when either stroke or fill are called.
+//It will have to be added to each shape's print function. Ill probably do it tonight. I'll make sure to retain current functionality as well
+//so that tests arent broken.
+
+//class takes an initializer list of shared_ptr to shape objects and appends showpage/n to the end.
+class page : public shape {
+public:
+	page(initializer_list<shared_ptr<shape>> list) {
+		for (shared_ptr<shape> i : list) {
+			_shapes.push_back(i);
+		}
+	}
+	void print(ostream& out) override {
+		for (int i = 0; i < _shapes.size(); i++) {
+			_shapes[i]->print(out);
+		}
+		out << "showpage\n";
+	}
+private:
+	vector<shared_ptr<shape>> _shapes;
+};
 
 
 
 
 
-
+//section for actual drawn shapes
 
 //basic shape, a rectangle
 class rectangle: public shape{
@@ -389,6 +457,47 @@ private:
 	}
 	vector<Point> _normalized_points;
 	bool _close;
+};
+
+
+class functionShape: public shape{
+public:
+	functionShape(function<double (double)> func,double minTheta,double maxTheta,double dTheta){
+		_func=func;
+		_min=minTheta;
+		_max=maxTheta;
+		_dt=dTheta;
+		_hitX=0;
+		_hitY=0;
+		for(double ang=_min;ang<=_max;ang+=_dt){
+			_hitX=max(_hitX,abs(_func(ang)*cos(toRad(ang))));
+			_hitY=max(_hitY,abs(_func(ang)*sin(toRad(ang))));
+		}
+	}
+	void print(ostream& out) override {
+		out << "newpath\n";
+		printPoint(out,_min);
+		out << " moveto\n";
+		for(double ang=_min+_dt;ang<=_max;ang+=_dt){
+			printPoint(out,ang);
+			out << " lineto\n";
+		}
+		out << "closepath\nstroke\n";
+	}
+private:
+	void printPoint(ostream& out, double ang){
+		out << _func(ang)*cos(toRad(ang)) << " " << _func(ang)*sin(toRad(ang));
+	}
+	double toDeg(double rad){
+		return rad*360/3.1415;
+	}
+	double toRad(double deg){
+		return deg*3.1415/360;
+	}
+	function<double (double)> _func;
+	double _min;
+	double _max;
+	double _dt;
 };
 
 //To Test put in file main.cpp (catch testing framework)->

@@ -3,3 +3,4 @@
 4-13 now there is a polygon class that works
 4-14 using shared pointers to prevent memory leaks
 4-17 added notation to the code i wrote
+4-18 now will be able to print r=r(theta) graphs;
