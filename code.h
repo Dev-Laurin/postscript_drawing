@@ -64,7 +64,7 @@ private:
 };
 
 
-//a pure virtual std::function that is a shape and has the ability to print to a o stream and knows its hitbox
+//a pure virtual function that is a shape and has the ability to print to a o stream and knows its hitbox
 class shape{
 public:
     virtual ~shape(){}
@@ -216,8 +216,6 @@ private:
 //    plus three color variables and appends gsave/n (n) setlinewidth/n (n) (n) (n) setrgbcolor/n ... grestore/n to the print
 //OR takes a single color variable, which indicates grayscale and appends gsave/n (n) setlinewidth/n (n) setgray/n ... grestore/n to the print
 //PRECONDITIONS: all passed variables must be positive.
-//Note that setting the line width to greater than 1 can cause overlap in aligned objects.
-//Additional note: This class does not update the hitbox (should be unnecessary)
 class set_stroke : public shape {
 public:
 	set_stroke(std::shared_ptr<shape> s, double line_width, double red, double green, double blue) {
@@ -227,8 +225,8 @@ public:
 		_green = green;
 		_blue = blue;
 		_color = true;
-		_hitX = _theShape->_hitX;
-		_hitY = _theShape->_hitY;
+		_hitX = _theShape->_hitX + line_width/2;
+		_hitY = _theShape->_hitY + line_width/2;
 	}
 	set_stroke(std::shared_ptr<shape> s, double line_width, double gray) {
 		_theShape = s;
