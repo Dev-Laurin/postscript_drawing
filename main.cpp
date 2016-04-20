@@ -260,10 +260,9 @@ TEST_CASE("Draw a Triangle", "On Page One"){
 		//The postscript code that should output
 		ostringstream answer; 
 		answer << "newpath\n";  
-			answer << -0.5*length << " " << round(sin(60)*length) << " moveto\n";
-			answer << "stack\n";  
-			answer << 0.5*length << " " << round(sin(60)*length) << " lineto\n"; 
-			answer << 0.5*length << " " << round(-sin(60)*length) << " lineto\n"; 
+			answer << -0.5*length << " " << round(-sin(60)*length-1) << " moveto\n";
+			answer << "-" << 0 << " " << -round(2*(-sin(60)*length-1)) << " lineto\n"; 
+			answer << 0.5*length << " " << round(-sin(60)*length-1) << " lineto\n"; 
 			answer << "closepath\n" << "stroke" << endl; 
 
 		REQUIRE(test1.str() == answer.str()); 
@@ -323,7 +322,7 @@ TEST_CASE("Draw a Circle", "On Page One"){
 }
 
 TEST_CASE("Draw a Polygon", "On Page One"){
-	SECTION("Draw the Default Polygon: 1 Inch"){
+	SECTION("Draw the Default Polygon: 5 sides"){
 		//Make a Default
 		ostringstream test1;  
 		double length = inch*6; 
@@ -335,10 +334,11 @@ TEST_CASE("Draw a Polygon", "On Page One"){
 		//The postscript code that s1 should output
 		ostringstream answer; 
 		answer << "newpath\n";  
-			answer << -0.5*length << " " << -0.5*inch << " moveto\n"; 
-			answer << -0.5*inch << " " << 0.5*inch << " lineto\n"; 
-			answer << 0.5*inch << " " << 0.5*inch << " lineto\n"; 
-			answer << 0.5*inch << " " << -0.5*inch << " lineto\n"; 
+			answer << -216 << " " << 297 << " moveto\n"; 
+			answer << -350 << " " << -114 << " lineto\n"; 
+			answer << "-"<< 0 << " " << -367 << " lineto\n"; 
+			answer << 349 << " " << -114 << " lineto\n";
+			answer << 216 << " " << 297 << " lineto\n";  
 			answer << "closepath\n" << "stroke" << endl; 
 
 		REQUIRE(test1.str() == answer.str()); 
@@ -381,22 +381,159 @@ TEST_CASE("Draw Compound Shape Rotated", "On Page Two"){
 
 TEST_CASE("Draw Compound Shape: Vertical", "On Page Two"){
 
-	SECTION("Draw a Square Circle Square"){
+	SECTION("Draw a Square-Circle-Square"){
 		ostringstream test1; 
 		double length = inch; 
-		int angle = 45; 
 		
 		shared_ptr<shape> sqPtr = make_shared<square>(length); 
-		rotated r1(sqPtr, angle); 
+		shared_ptr<shape> cPtr = make_shared<circle>(length); 
+		shared_ptr<shape> sqPtr2 = make_shared<square>(length); 
 
-		r1.print(out); //To postscript page
-		r1.print(test1); //For testing only
+		vertical v({sqPtr,cPtr,sqPtr2}); 
 
+		v.print(out); //To postscript page
+		v.print(test1); //For testing only
+
+		double boundBoxBuffer = 1.707125; 
+		double boundBox = round(boundBoxBuffer * length); 
 
 		ostringstream answer; 
-		answer << "gsave\n" << angle << " rotate\n"; 
+		answer << "gsave\n"; 
+		answer << 0 << " " << -boundBox << " translate\n"; 
+		//Square
 			answer << "newpath\n";  
 			answer << -0.5*length << " " << 0.5*length << " moveto\n"; 
+			answer << -0.5*length << " " << -0.5*length << " lineto\n"; 
+			answer << 0.5*length << " " << -0.5*length << " lineto\n"; 
+			answer << 0.5*length << " " << 0.5*length << " lineto\n"; 
+			answer << "closepath\n" << "stroke" << endl; 
+		//Circle
+			answer << 0 << " " << boundBox << " translate\n"; 
+			answer << 0 << " " << 0 << " " << length << " "; 
+			answer << 0 << " " << 360 << " arc stroke" << endl; 
+		//Square
+			answer << 0 << " " << boundBox << " translate\n"; 
+			answer << "newpath\n";  
+			answer << -0.5*length << " " << 0.5*length << " moveto\n"; 
+			answer << -0.5*length << " " << -0.5*length << " lineto\n"; 
+			answer << 0.5*length << " " << -0.5*length << " lineto\n"; 
+			answer << 0.5*length << " " << 0.5*length << " lineto\n"; 
+			answer << "closepath\n" << "stroke" << endl; 
+		 answer << "grestore" << endl; 
+
+		REQUIRE(test1.str() == answer.str()); 
+	}
+}
+
+TEST_CASE("Draw a Compound Shape: Horizontal", "On Page 2"){
+	SECTION("Draw a Square-Circle-Square"){
+		ostringstream test1; 
+		double length = inch; 
+		
+		shared_ptr<shape> sqPtr = make_shared<square>(length); 
+		shared_ptr<shape> cPtr = make_shared<circle>(length); 
+		shared_ptr<shape> sqPtr2 = make_shared<square>(length); 
+
+		horizontal h({sqPtr,cPtr,sqPtr2}); 
+
+		h.print(out); //To postscript page
+		h.print(test1); //For testing only
+
+		double boundBoxBuffer = 1.707125; 
+		double boundBox = round(boundBoxBuffer * length); 
+
+		ostringstream answer; 
+		answer << "gsave\n"; 
+		answer << -boundBox << " " << 0 << " translate\n"; 
+		//Square
+			answer << "newpath\n";  
+			answer << -0.5*length << " " << 0.5*length << " moveto\n"; 
+			answer << -0.5*length << " " << -0.5*length << " lineto\n"; 
+			answer << 0.5*length << " " << -0.5*length << " lineto\n"; 
+			answer << 0.5*length << " " << 0.5*length << " lineto\n"; 
+			answer << "closepath\n" << "stroke" << endl; 
+		//Circle
+			answer << boundBox << " " << 0 << " translate\n"; 
+			answer << 0 << " " << 0 << " " << length << " "; 
+			answer << 0 << " " << 360 << " arc stroke" << endl; 
+		//Square
+			answer << boundBox << " " << 0 << " translate\n";  
+			answer << "newpath\n";  
+			answer << -0.5*length << " " << 0.5*length << " moveto\n"; 
+			answer << -0.5*length << " " << -0.5*length << " lineto\n"; 
+			answer << 0.5*length << " " << -0.5*length << " lineto\n"; 
+			answer << 0.5*length << " " << 0.5*length << " lineto\n"; 
+			answer << "closepath\n" << "stroke" << endl; 
+		 answer << "grestore" << endl; 
+
+		REQUIRE(test1.str() == answer.str()); 
+	}
+}
+
+TEST_CASE("Draw a Compound Shape: Layered", "On Page 3"){
+	//New page
+	out << "showpage" << endl; 
+	out << "200 400 translate\n";
+
+	SECTION("Draw a Layered object: Square-Circle-Square "){
+		ostringstream test1; 
+		double length = inch; 
+		
+		shared_ptr<shape> sqPtr = make_shared<square>(length); 
+		shared_ptr<shape> cPtr = make_shared<circle>(length); 
+		shared_ptr<shape> poPtr = make_shared<polygon>(5,length);
+
+		layered l({sqPtr,cPtr,poPtr}); 
+
+		l.print(out); //To postscript page
+		l.print(test1); //For testing only
+
+		ostringstream answer; 
+		//Square
+			answer << "newpath\n";  
+			answer << -0.5*length << " " << 0.5*length << " moveto\n"; 
+			answer << -0.5*length << " " << -0.5*length << " lineto\n"; 
+			answer << 0.5*length << " " << -0.5*length << " lineto\n"; 
+			answer << 0.5*length << " " << 0.5*length << " lineto\n"; 
+			answer << "closepath\n" << "stroke" << endl; 
+		//Circle 
+			answer << 0 << " " << 0 << " " << length << " "; 
+			answer << 0 << " " << 360 << " arc stroke" << endl; 
+		//Pentagon
+			answer << "newpath\n";  
+			answer << -36 << " " << 50 << " moveto\n"; 
+			answer << -58 << " " << -19 << " lineto\n"; 
+			answer << "-"<< 0 << " " << -61 << " lineto\n"; 
+			answer << 58 << " " << -19 << " lineto\n";
+			answer << 36 << " " << 50 << " lineto\n";  
+			answer << "closepath\n" << "stroke" << endl; 
+
+		REQUIRE(test1.str() == answer.str()); 
+	}
+}
+
+TEST_CASE("Draw a Compound Shape: Scaled", "On Page 3"){
+
+	SECTION("Draw a Scaled Object: Square"){
+		ostringstream test1; 
+		double length = inch; 
+
+		double xScaledFactor = 2; 
+		double YScaledFactor = 3; 
+		
+		shared_ptr<shape> sqPtr = make_shared<square>(length); 
+
+		scaled s(sqPtr, xScaledFactor, YScaledFactor); 
+
+		s.print(out); //To postscript page
+		s.print(test1); //For testing only
+
+		ostringstream answer; 
+		//Square
+			answer << "gsave\n" << xScaledFactor << " "; 
+			answer << YScaledFactor << " scale\n"; 
+			answer << "newpath\n";  
+			answer << (-0.5*length) << " " << 0.5*length << " moveto\n"; 
 			answer << -0.5*length << " " << -0.5*length << " lineto\n"; 
 			answer << 0.5*length << " " << -0.5*length << " lineto\n"; 
 			answer << 0.5*length << " " << 0.5*length << " lineto\n"; 
@@ -405,20 +542,5 @@ TEST_CASE("Draw Compound Shape: Vertical", "On Page Two"){
 		REQUIRE(test1.str() == answer.str()); 
 	}
 }
-
 //TEST OUR OWN SHAPES
 
-
-//Parker's main.cpp code
-/*
-    ofstream out("output.ps");
-    out << "200 400 translate\n";
-    shared_ptr<shape> toP=make_shared<polygon>(3,10);
-
-    for(int i=4;i<12;i++){
-         shared_ptr<polygon> cir= make_shared<polygon>(i,20);
-         toP=shared_ptr<shape>(new vertical({toP,cir}));
-    }
-    toP=shared_ptr<shape>(new horizontal({toP,toP,toP,toP,toP}));
-    toP->print(out);
-*/ 
