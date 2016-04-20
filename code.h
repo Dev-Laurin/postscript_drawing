@@ -87,6 +87,16 @@ public:
     virtual void print(ostream& out) =0;
     double _hitX =10;
     double _hitY =10;
+
+	//variables and bools for fill color, fill type, whether or not to fill
+	//This is a quick and dirty way to get fill functionality into every shape,
+	//and may be necessary due to the way things are designed. Would appreciate feedback if there is time.
+	double _fRed = 1;
+	double _fGreen = 1;
+	double _fBlue = 1;
+	double _fGray = 1;
+	bool _fill = false;
+	bool _fColor = false;
 };
 
 
@@ -221,38 +231,43 @@ private:
 //class takes a shared_ptr<shape> object plus a line width variable
 //    plus three color variables and appends gsave/n (n) setlinewidth/n (n) (n) (n) setrgbcolor/n ... grestore/n to the print
 //OR takes a single color variable, which indicates grayscale and appends gsave/n (n) setlinewidth/n (n) setgray/n ... grestore/n to the print
-//PRECONDITION: all passed variables must be positive 
+//PRECONDITIONS: all passed variables must be positive.
 //Note that setting the line width to greater than 1 can cause overlap in aligned objects.
+//Additional note: This class does not update the hitbox (should be unnecessary)
 class set_stroke : public shape {
 public:
 	set_stroke(shared_ptr<shape> s, double line_width, double red, double green, double blue) {
-		_the_shape = s;
+		_theShape = s;
 		_line_width = line_width;
 		_red = red;
 		_green = green;
 		_blue = blue;
 		_color = true;
+		_hitX = _theShape->_hitX;
+		_hitY = _theShape->_hitY;
 	}
 	set_stroke(shared_ptr<shape> s, double line_width, double gray) {
-		_the_shape = s;
+		_theShape = s;
 		_line_width = line_width;
 		_gray = gray;
 		_color = false;
+		_hitX = _theShape->_hitX;
+		_hitY = _theShape->_hitY;
 	}
 	void print(ostream& out) override {
 		if (_color) {
 			out << "gsave\n" << _line_width << " setlinewidth\n" << _red << " " << _green << " " << _blue << " setrgbcolor\n";
-			_the_shape->print(out);
+			_theShape->print(out);
 			out << " grestore\n";
 		}
 		else {
 			out << "gsave\n" << _line_width << " setlinewidth\n" << _gray << " setgray\n ";
-			_the_shape->print(out);
+			_theShape->print(out);
 			out << "grestore\n";
 		}
 	}
 private:
-	shared_ptr<shape> _the_shape;
+	shared_ptr<shape> _theShape;
 	double _line_width;
 	double _red;
 	double _green;
@@ -261,11 +276,53 @@ private:
 	bool _color;
 };
 
-//NOTE: set_fill will require significantly more work, as the shape paths are destroyed in postscript when either stroke or fill are called.
-//It will have to be added to each shape's print function. Ill probably do it tonight. I'll make sure to retain current functionality as well
-//so that tests arent broken.
+//------------------------------------
+//PRECONDITIONS: all passed variables must be positive.
+//this class does not add anything to the print. It simply modifies the fill variables in the shape virtual class.
+//This is necessary due to the destructive nature of calling fill or stroke - the fill call must be made after the lines are
+//drawn but before stroke is called. I can't think of an elegant method for inserting it here - it would require
+//converting the ostream to a string, scanning for the stroke, and then inserting beforehand.
+//It could also be done if, say, stroke and fill are created in an inherited class that we pass shapes into for printing.
+//However, this method would break all of the tests. Bit of an impasse here.
+class set_fill : public shape {
+public:
+	set_fill(shared_ptr<shape> s, double red, double green, double blue) {
+		_theShape = s;
+		_theShape->_fColor = true;
+		_theShape->_fill = true;
+		_theShape->_fRed = red;
+		_theShape->_fGreen = green;
+		_theShape->_fBlue = blue;
+		_hitX = _theShape->_hitX;
+		_hitY = _theShape->_hitY;
+	}
+	set_fill(shared_ptr<shape> s, double gray) {
+		_theShape = s;
+		_theShape->_fill = true;
+		_theShape->_fGray = gray;
+		_hitX = _theShape->_hitX;
+		_hitY = _theShape->_hitY;
+	}
+	void print(ostream& out) override {
+		_theShape->print(out);
+	}
+private:
+	shared_ptr<shape> _theShape;
+};
+
+//these helper functions insert the gsave\n <color settings> fill\n grestore\n. It is called in every actual drawn shape object.
+string fill_helper(double red, double green, double blue) {
+	string h = "gsave\n " + std::to_string(red) + " " + std::to_string(green) + " " + std::to_string(blue) + " setrgbcolor\nfill\ngrestore\n";
+	return h;
+}
+string fill_helper(double gray) {
+	string h = "gsave\n " + std::to_string(gray) + " setgray\nfill\ngrestore\n";
+	return h;
+}
+//--------------------------------------- end of fill-related class and functions
 
 //class takes an initializer list of shared_ptr to shape objects and appends showpage/n to the end.
+//usage: No new transforms should be added to this shape once created. It is for final consolidation of a page of objects.
 class page : public shape {
 public:
 	page(initializer_list<shared_ptr<shape>> list) {
@@ -299,12 +356,19 @@ public:
         _hitY=_height/2;
     }
     void print(ostream& out) override{
-        out << "newpath\n"
-            << -.5*_width << " " << -.5*_height << " moveto\n"
-            << -.5*_width << " " << .5*_height << " lineto\n"
-            << .5*_width << " " << .5*_height << " lineto\n"
-            << .5*_width << " " << -.5*_height << " lineto\n"
-            << "closepath\nstroke\n";
+		out << "newpath\n"
+			<< -.5*_width << " " << -.5*_height << " moveto\n"
+			<< -.5*_width << " " << .5*_height << " lineto\n"
+			<< .5*_width << " " << .5*_height << " lineto\n"
+			<< .5*_width << " " << -.5*_height << " lineto\n"
+			<< "closepath\n";
+		if (_fill) {
+			if (_fColor)
+				out << fill_helper(_fRed, _fGreen, _fBlue);
+			else
+				out << fill_helper(_fGray);
+		}
+		out << "stroke\n";
     }
     ~rectangle(){}
 private:
@@ -338,7 +402,14 @@ public:
         _hitY=_radius;
     }
     void print(ostream& out) override{
-        out << "0 0 " << _radius << " 0 360 arc stroke\n";
+		out << "0 0 " << _radius << " 0 360 arc";
+		if (_fill) {
+			if (_fColor)
+				out << fill_helper(_fRed, _fGreen, _fBlue);
+			else
+				out << fill_helper(_fGray);
+		}
+		out << " stroke\n";
     }
 private:
     double _radius;
@@ -367,7 +438,15 @@ public:
                 printPoint(out,i);
                 out << " lineto\n";
             }
-        out << "closepath\nstroke\n";
+		out << "closepath\n";
+		if (_fill) {
+			if (_fColor)
+				out << fill_helper(_fRed, _fGreen, _fBlue);
+			else {
+				out << fill_helper(_fGray);
+			}
+		}
+		out << "stroke\n";
     }
 private:
     void printPoint(ostream& out,int N){//knows where each vertex is
@@ -422,6 +501,8 @@ public:
 			Point temp = points[i] - centroid;
 			_normalized_points.push_back(temp);
 		}
+		_hitX = 0;
+		_hitY = 0;
 		for (int i = 0; i < _normalized_points.size(); i++) {
 			_hitX = max(abs(_normalized_points[i].getX()), _hitX);
 			_hitY = max(abs(_normalized_points[i].getY()), _hitY);
@@ -438,8 +519,14 @@ public:
 			printPoint(out, _normalized_points[i]);
 			out << " lineto\n";
 		}
-		if(_close) out << "closepath\nstroke\n";
-		else out << "stroke\n";
+		if(_close) out << "closepath\n";
+		if (_fill) {
+			if (_fColor)
+				out << fill_helper(_fRed, _fGreen, _fBlue);
+			else
+				out << fill_helper(_fGray);
+		}
+		out << "stroke\n";
 	}
 
 private:
@@ -482,7 +569,14 @@ public:
 			printPoint(out,ang);
 			out << " lineto\n";
 		}
-		out << "closepath\nstroke\n";
+		out << "closepath\n";
+		if (_fill) {
+			if (_fColor)
+				out << fill_helper(_fRed, _fGreen, _fBlue);
+			else
+				out << fill_helper(_fGray);
+		}
+		out << "stroke\n";
 	}
 private:
 	void printPoint(ostream& out, double ang){
@@ -499,28 +593,5 @@ private:
 	double _max;
 	double _dt;
 };
-
-//To Test put in file main.cpp (catch testing framework)->
-
-// int main(){
-//     ofstream out("output.ps");
-    
-//     shared_ptr<shape> toP=make_shared<polygon>(3,10);
-
-//     for(int i=4;i<12;i++){
-//         shared_ptr<polygon> cir= make_shared<polygon>(i,20);
-//         toP=shared_ptr<shape>(new vertical({toP,cir}));
-//     }
-//     toP=shared_ptr<shape>(new horizontal({toP,toP,toP,toP,toP}));
-//     toP->print(out);
-// /*
-//     rectangle rec(1,1);
-//     rotated rotrec({&rec},45);
-//     scaled scaleSquare(&rotrec,100,100);
-//     scaled scaleSquare2(&rec,100,100);
-//     layered top{&scaleSquare,&scaleSquare2};
-//     top.print(out);*/
-// }
-// <-
 
 #endif  /* CODE_H_INCLUDED  */
