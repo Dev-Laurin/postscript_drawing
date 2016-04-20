@@ -59,13 +59,16 @@ using std::ostringstream;
 // }
 
 //File to output postscript
-ofstream out("output.ps");
+ofstream out("testing.ps");
 double inch = 72.0; //Units in postscript
 
-
+//TEST THE BASIC SHAPES
 TEST_CASE("Draw a Square", "On Page One"){
 
 	SECTION("Draw a Square of length 0"){
+		//Print shapes in middle of page, Global Coord
+		out << "200 400 translate\n";
+
 		ostringstream test1; 
 		double length = inch * 0; 
 		square s1(length); 
@@ -201,6 +204,52 @@ TEST_CASE("Draw a Rectangle", "On Page One"){
 	}
 }
 
+TEST_CASE("Draw a Spacer", "On Page One"){
+	SECTION("Draw a Spacer of length 0"){
+		//Make a Default
+		ostringstream test1;  
+
+		double height = 0; 
+		double width = 0; 
+
+		spacer r1(width, height); 
+		r1.print(test1); 
+
+		r1.print(out); //Put on Page 1 
+
+		REQUIRE(test1.str() == ""); 
+	}
+
+	SECTION("Draw a Default Spacer: 2x4 inches"){
+		//Make a Default
+		ostringstream test1;  
+
+		double height = inch*4; 
+		double width = inch*2; 
+
+		spacer r1(width, height); 
+		r1.print(test1); 
+
+		r1.print(out); //Put on Page 1 
+
+		REQUIRE(test1.str() == ""); 
+	}
+
+	SECTION("Draw an arbitrarily large Spacer"){
+	//Make a Default
+	ostringstream test1;  
+
+	double height = inch*10; 
+	double width = inch*8; 
+
+	spacer r1(width, height); 
+	r1.print(test1); 
+
+	r1.print(out); //Put on Page 1 
+
+	REQUIRE(test1.str() == ""); 
+	}
+}
 
 TEST_CASE("Draw a Triangle", "On Page One"){
 	SECTION("Draw the Default Triangle: 1 Inch"){
@@ -216,9 +265,10 @@ TEST_CASE("Draw a Triangle", "On Page One"){
 		//The postscript code that should output
 		ostringstream answer; 
 		answer << "newpath\n";  
-			answer << -0.5*length << " " << round(sin(60)*length) << " moveto\n"; 
+			answer << -0.5*length << " " << round(sin(60)*length) << " moveto\n";
+			answer << "stack\n";  
 			answer << 0.5*length << " " << round(sin(60)*length) << " lineto\n"; 
-			answer << 0.5*length << " " << round(sin(60)*length) << " lineto\n"; 
+			answer << 0.5*length << " " << round(-sin(60)*length) << " lineto\n"; 
 			answer << "closepath\n" << "stroke" << endl; 
 
 		REQUIRE(test1.str() == answer.str()); 
@@ -299,6 +349,69 @@ TEST_CASE("Draw a Polygon", "On Page One"){
 		REQUIRE(test1.str() == answer.str()); 
 	}
 }
+
+
+
+
+//TEST THE COMPOUND SHAPES
+TEST_CASE("Draw Compound Shape Rotated", "On Page Two"){
+	//Make a new page
+	out << "showpage" << endl; 
+	out << "200 400 translate\n";
+
+	SECTION("Draw a Rotated Square: 45 Degrees"){
+		ostringstream test1; 
+		double length = inch; 
+		int angle = 45; 
+
+		shared_ptr<shape> sqPtr = make_shared<square>(length); 
+		rotated r1(sqPtr, angle); 
+
+		r1.print(out); //To postscript page
+		r1.print(test1); //For testing only
+
+
+		ostringstream answer; 
+		answer << "gsave\n" << angle << " rotate\n"; 
+			answer << "newpath\n";  
+			answer << -0.5*length << " " << 0.5*length << " moveto\n"; 
+			answer << -0.5*length << " " << -0.5*length << " lineto\n"; 
+			answer << 0.5*length << " " << -0.5*length << " lineto\n"; 
+			answer << 0.5*length << " " << 0.5*length << " lineto\n"; 
+			answer << "closepath\n" << "stroke\n" << "grestore" << endl; 
+
+		REQUIRE(test1.str() == answer.str()); 
+	}
+}
+
+TEST_CASE("Draw Compound Shape: Vertical", "On Page Two"){
+
+	SECTION("Draw a Square Circle Square"){
+		ostringstream test1; 
+		double length = inch; 
+		int angle = 45; 
+		
+		shared_ptr<shape> sqPtr = make_shared<square>(length); 
+		rotated r1(sqPtr, angle); 
+
+		r1.print(out); //To postscript page
+		r1.print(test1); //For testing only
+
+
+		ostringstream answer; 
+		answer << "gsave\n" << angle << " rotate\n"; 
+			answer << "newpath\n";  
+			answer << -0.5*length << " " << 0.5*length << " moveto\n"; 
+			answer << -0.5*length << " " << -0.5*length << " lineto\n"; 
+			answer << 0.5*length << " " << -0.5*length << " lineto\n"; 
+			answer << 0.5*length << " " << 0.5*length << " lineto\n"; 
+			answer << "closepath\n" << "stroke\n" << "grestore" << endl; 
+
+		REQUIRE(test1.str() == answer.str()); 
+	}
+}
+
+//TEST OUR OWN SHAPES
 
 
 //Parker's main.cpp code
