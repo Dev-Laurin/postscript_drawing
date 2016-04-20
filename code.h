@@ -187,11 +187,11 @@ public:
         }
     }
     void print(ostream& out) override{
-        out << "gsave\n0 " << -_hitY+_shapes[0]->_hitY << " translate\n"; //translate to the bottom of the object then up to where the center of the first shape shuld be
+        out << "gsave\n0 " << round(-_hitY+_shapes[0]->_hitY) << " translate\n"; //translate to the bottom of the object then up to where the center of the first shape shuld be
         _shapes[0]->print(out);//print out the first shape
         for(int i=1;i<_shapes.size();i++){
             //for the rest translate to the center of the shape and print
-            out << "0 " << _shapes[i-1]->_hitY+_shapes[i]->_hitY << " translate\n";
+            out << "0 " << round(_shapes[i-1]->_hitY+_shapes[i]->_hitY) << " translate\n";
             _shapes[i]->print(out);
         }
         out << "grestore\n";
@@ -215,10 +215,10 @@ public:
         }
     }
     void print(ostream& out) override{
-        out << "gsave\n" << -_hitX+_shapes[0]->_hitX << " 0 " << " translate\n";
+        out << "gsave\n" << round(-_hitX+_shapes[0]->_hitX) << " 0 " << "translate\n";
         _shapes[0]->print(out);
         for(int i=1;i<_shapes.size();i++){
-            out << _shapes[i-1]->_hitX+_shapes[i]->_hitX << " 0 "  << " translate\n";
+            out << round(_shapes[i-1]->_hitX+_shapes[i]->_hitX) << " 0 "  << "translate\n";
             _shapes[i]->print(out);
         }
         out << "grestore\n";
